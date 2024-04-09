@@ -5,10 +5,12 @@ import { NavigationContainer } from "@react-navigation/native";
 import { MainNavigator } from "./Main";
 import { WelcomeContainer } from "@/Screens/Welcome";
 import { RootScreens } from "@/Screens";
+import { OnboardContainer } from "@/Screens/Onboard";
 
 export type RootStackParamList = {
   [RootScreens.MAIN]: undefined;
   [RootScreens.WELCOME]: undefined;
+  [RootScreens.ONBOARD]: undefined;
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -19,6 +21,10 @@ const ApplicationNavigator = () => {
     <NavigationContainer>
       <StatusBar />
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
+      <RootStack.Screen
+          name={RootScreens.ONBOARD}
+          component={OnboardContainer}
+        />
         <RootStack.Screen
           name={RootScreens.WELCOME}
           component={WelcomeContainer}
@@ -26,7 +32,9 @@ const ApplicationNavigator = () => {
         <RootStack.Screen
           name={RootScreens.MAIN}
           component={MainNavigator}
-          options={{}}
+          options={{
+            gestureEnabled: false
+          }}
         />
       </RootStack.Navigator>
     </NavigationContainer>
