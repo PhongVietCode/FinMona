@@ -21,7 +21,7 @@ const ApplicationNavigator = () => {
     <NavigationContainer>
       <StatusBar />
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
-      <RootStack.Screen
+        <RootStack.Screen
           name={RootScreens.ONBOARD}
           component={OnboardContainer}
         />
@@ -33,7 +33,7 @@ const ApplicationNavigator = () => {
           name={RootScreens.MAIN}
           component={MainNavigator}
           options={{
-            gestureEnabled: false
+            gestureEnabled: false,
           }}
         />
       </RootStack.Navigator>

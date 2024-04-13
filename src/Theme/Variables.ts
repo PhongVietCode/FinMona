@@ -8,24 +8,35 @@
 /**
  * Colors
  */
-export enum Colors {
+enum Colors {
   TRANSPARENT = "rgba(0,0,0,0)",
-  INPUT_BACKGROUND = "#FFFFFF",
-  WHITE = "#ffffff",
-  TEXT = "#212529",
-  PRIMARY = "#E14032",
+  WHITE = "#FFFFFF",
+  PRIMARY = "#516EFC",
+  TEXT_BOLD = "#28292C",
+  TEXT_NORMAL="#363847",
+  TEXT_LIGHT="E3E3E9",
+  STROKE="F8F7FD",
+  WARN="#FF6B84",
+  BUTTON="#A682F9",
+  CAUTION="#FBCF35",
+  SECONDARY="#4E45BF",
+  LIGHT_GRAY="#908EAB",
   SUCCESS = "#28a745",
-  ERROR = "#dc3545",
+  ERROR = "#dc3545",  
+  GREEN_80="#2AB784",
+  BACKGROUND="#FCFCFC",
+
 }
 
-export enum NavigationColors {
-  PRIMARY = Colors.PRIMARY,
+enum NavigationColors {
+  ACTIVE = Colors.PRIMARY,
+  INACTIVE = Colors.LIGHT_GRAY
 }
 
 /**
  * FontSize
  */
-export enum FontSize {
+enum FontSize {
   SMALL = 16,
   REGULAR = 20,
   LARGE = 40,
@@ -39,9 +50,11 @@ const small = tiny * 2; // 10
 const regular = tiny * 3; // 15
 const large = regular * 2; // 30
 
-export enum MetricsSizes {
+enum MetricsSizes {
   TINY = tiny,
   SMALL = small,
   REGULAR = regular,
   LARGE = large,
 }
+
+export {Colors,NavigationColors,FontSize, MetricsSizes};
