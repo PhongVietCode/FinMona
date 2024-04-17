@@ -44,7 +44,7 @@ export const Onboard: FunctionComponent = () => {
 
   const changeImage = () => {
     if (index == 2) {
-      navigation.navigate(RootScreens.MAIN);
+      navigation.navigate(RootScreens.LOGIN);
     } else {
       setIndex((oldIndex) => oldIndex + 1);
     }

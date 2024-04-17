@@ -4,7 +4,8 @@ import { View, Text, StyleSheet } from "react-native";
 import { StatusBar } from "expo-status-bar";
 import { HStack, Spinner, Heading } from "native-base";
 import { User } from "@/Services";
-
+import AddIcon from "../../../assets/icons/circle-plus.svg"
+import { Colors } from "@/Theme/Variables";
 export interface IHomeProps {
   data: User | undefined;
   isLoading: boolean;

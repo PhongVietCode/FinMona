@@ -14,8 +14,8 @@ enum Colors {
   PRIMARY = "#516EFC",
   TEXT_BOLD = "#28292C",
   TEXT_NORMAL="#363847",
-  TEXT_LIGHT="E3E3E9",
-  STROKE="F8F7FD",
+  TEXT_LIGHT="#E3E3E9",
+  STROKE="#F8F7FD",
   WARN="#FF6B84",
   BUTTON="#A682F9",
   CAUTION="#FBCF35",
@@ -37,9 +37,11 @@ enum NavigationColors {
  * FontSize
  */
 enum FontSize {
-  SMALL = 16,
+  TINY = 12,
+  SMALL= 15,
   REGULAR = 20,
-  LARGE = 40,
+  LARGE = 24,
+  HUGE = 32,
 }
 
 /**

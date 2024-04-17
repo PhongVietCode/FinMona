@@ -32,7 +32,7 @@ const AddNewTransactionButton = (props:any) =>(
 export const MainNavigator = () => {
   return (
     <Tab.Navigator screenOptions={{
-      headerShown:false,
+      headerShown:true,
       tabBarShowLabel:true,
       tabBarHideOnKeyboard: true, 
     }}>
@@ -47,6 +47,13 @@ export const MainNavigator = () => {
             </View>
           ),
           tabBarLabelPosition: "below-icon",
+          headerTitle: 'phong',
+          headerLeft: () => (
+            <Text>Phong</Text>
+          ),
+          headerRight: () => (
+            <Text>HIHI</Text>
+          ),
         }}
       />
       <Tab.Screen
