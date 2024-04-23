@@ -4,7 +4,7 @@ import { Pressable, SafeAreaView, Text, View } from "react-native";
 import { gStyles } from "../../Theme";
 import { styles } from "./Login.style";
 import { UserInput } from "@/Components";
-import { Colors } from "@/Theme/Variables";
+import { Colors, FontSize } from "@/Theme/Variables";
 import { BigButton } from "@/Components/BigButton/BigButton";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -54,6 +54,7 @@ const Login = () => {
           backgroundColor={Colors.PRIMARY}
           textColors={Colors.WHITE}
           icon={undefined}
+          textStyle={FontSize.REGULAR}
           onPress={() => {
             navigation.navigate(RootScreens.MAIN)
           }}
@@ -61,8 +62,9 @@ const Login = () => {
         <BigButton
           text={"Forgot password ?"}
           backgroundColor={Colors.TRANSPARENT}
-          textColors={Colors.PRIMARY}
+          textColors={Colors.LIGHT_GRAY}
           icon={undefined}
+          textStyle={FontSize.REGULAR}
           onPress={() => {}}
         />
         <Text style={[gStyles.title3, { color: Colors.LIGHT_GRAY }]}>

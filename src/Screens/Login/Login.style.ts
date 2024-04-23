@@ -15,11 +15,11 @@ export const styles = StyleSheet.create({
     },
     inputContainer:{
         width: '100%',
-        gap: 16
+        gap: 24
     },
     header:{
         width: '100%',
-        paddingVertical: 8,
+        paddingVertical: 16,
         display: 'flex',
         justifyContent: 'center',
         alignItems: 'center',

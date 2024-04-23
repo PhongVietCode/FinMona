@@ -8,6 +8,7 @@ import { RootScreens } from "@/Screens";
 import { OnboardContainer } from "@/Screens/Onboard";
 import LoginContainer from "@/Screens/Login/LoginContainer";
 import { SignUpContainer } from "@/Screens/SignUp";
+import { AddTransactionContainer } from "@/Screens/Add_Transaction";
 
 export type RootStackParamList = {
   [RootScreens.MAIN]: undefined;
@@ -15,6 +16,7 @@ export type RootStackParamList = {
   [RootScreens.ONBOARD]: undefined;
   [RootScreens.LOGIN]: undefined;
   [RootScreens.SIGNUP]: undefined;
+  [RootScreens.ADDTRANS]:undefined;
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -53,6 +55,10 @@ const ApplicationNavigator = () => {
           options={{
             gestureEnabled: false,
           }}
+        />
+        <RootStack.Screen
+          name={RootScreens.ADDTRANS}
+          component={AddTransactionContainer}
         />
       </RootStack.Navigator>
     </NavigationContainer>
