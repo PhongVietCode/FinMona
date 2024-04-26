@@ -30,6 +30,7 @@ import {
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/Navigation";
+import { MoneySource } from "../Add_Transaction/AddTransaction";
 export interface IHomeProps {
   data: User | undefined;
   isLoading: boolean;
@@ -105,6 +106,7 @@ export const Home = (props: IHomeProps) => {
 
   const transac_list: TransactionProps[] = [
     {
+      source: MoneySource.Card,
       transac_type: TransacType.Income,
       category: TransacCategory.Food,
       description: "This is for testing",
@@ -113,6 +115,8 @@ export const Home = (props: IHomeProps) => {
       time: "10:09 AM",
     },
     {
+      source: MoneySource.Card,
+
       transac_type: TransacType.Income,
       category: TransacCategory.Food,
       description: "This is for testing",
@@ -121,6 +125,8 @@ export const Home = (props: IHomeProps) => {
       time: "10:09 AM",
     },
     {
+      source: MoneySource.Card,
+
       transac_type: TransacType.Income,
       category: TransacCategory.Food,
       description: "This is for testing",
@@ -129,6 +135,8 @@ export const Home = (props: IHomeProps) => {
       time: "10:09 AM",
     },
     {
+      source: MoneySource.Card,
+
       transac_type: TransacType.Income,
       category: TransacCategory.Food,
       description: "This is for testing",
@@ -137,6 +145,8 @@ export const Home = (props: IHomeProps) => {
       time: "10:09 AM",
     },
     {
+      source: MoneySource.Borrow,
+
       transac_type: TransacType.Income,
       category: TransacCategory.Food,
       description: "This is for testing",
@@ -145,6 +155,8 @@ export const Home = (props: IHomeProps) => {
       time: "10:09 AM",
     },
     {
+      source: MoneySource.Card,
+
       transac_type: TransacType.Income,
       category: TransacCategory.Food,
       description: "This is for testing",
@@ -153,6 +165,8 @@ export const Home = (props: IHomeProps) => {
       time: "10:09 AM",
     },
     {
+      source: MoneySource.Card,
+
       transac_type: TransacType.Income,
       category: TransacCategory.Food,
       description: "This is for testing",
@@ -161,6 +175,8 @@ export const Home = (props: IHomeProps) => {
       time: "10:09 AM",
     },
     {
+      source: MoneySource.Card,
+
       transac_type: TransacType.Income,
       category: TransacCategory.Food,
       description: "This is for testing",
@@ -169,6 +185,8 @@ export const Home = (props: IHomeProps) => {
       time: "10:09 AM",
     },
     {
+      source: MoneySource.Card,
+
       transac_type: TransacType.Income,
       category: TransacCategory.Food,
       description: "This is for testing",
@@ -177,6 +195,8 @@ export const Home = (props: IHomeProps) => {
       time: "10:09 AM",
     },
     {
+      source: MoneySource.Cash,
+
       transac_type: TransacType.Income,
       category: TransacCategory.Food,
       description: "This is for testing",
@@ -351,11 +371,12 @@ export const Home = (props: IHomeProps) => {
           <Search fill={Colors.TEXT_BOLD} />
         </View>
         <FlatList
-          style={{ overflow: "scroll", height: 200 }}
+          style={{ height: Dimensions.get("screen").height / 3.8 }}
           contentContainerStyle={{ rowGap: 10 }}
           data={transacList}
           renderItem={({ item, index }) => (
             <TransactionItem
+              source={item.source}
               transac_type={item.transac_type}
               description={item.description}
               title={item.title}
@@ -387,7 +408,7 @@ const styles = StyleSheet.create({
   },
   body: {
     paddingHorizontal: 16,
-    flex: 1,
+    flexGrow: 1,
   },
   tabContainer: {
     backgroundColor: Colors.TEXT_LIGHT,

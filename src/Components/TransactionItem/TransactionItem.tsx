@@ -3,8 +3,14 @@ import ShoppingIcon from "../../../assets/icons/shopping-bag-14.svg";
 import Food from "../../../assets/icons/Food.svg";
 import TransportIcon from "../../../assets/icons/school-bus.svg";
 import PartyIcon from "../../../assets/icons/party horn.svg";
-import { View, Text, StyleSheet } from "react-native";
+import { View, Text, StyleSheet, Pressable } from "react-native";
 import { gStyles } from "@/Theme";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "@/Navigation";
+import { RootScreens } from "@/Screens";
+import { useRoute } from "@react-navigation/native";
+import { MoneySource } from "@/Screens/Add_Transaction/AddTransaction";
 export enum TransacType {
   Income,
   Expense,
@@ -22,9 +28,10 @@ export interface TransactionProps {
   money: number;
   time: string;
   category: TransacCategory;
+  source: MoneySource;
 }
 
-const transactionStyle = (type: TransacCategory) => {
+export const transactionStyle = (type: TransacCategory) => {
   switch (type) {
     case TransacCategory.Shopping:
       return {
@@ -48,27 +55,35 @@ const transactionStyle = (type: TransacCategory) => {
       };
   }
 };
+export const moneyConvert = (money: number) => {
+  const strMoney = money.toString();
+  let res = "";
+  let count = 0;
+  let index = 0;
+  while (index < strMoney.length) {
+    if (count == 3) {
+      res = "." + res;
+      count = 0;
+    }
+    res = strMoney[index] + res;
+    count++;
+    index++;
+  }
+  return res;
+};
 export const TransactionItem = (props: TransactionProps) => {
   const itemStyle = transactionStyle(props.category);
-  const moneyConvert = (money: number) => {
-    const strMoney = money.toString()
-    let res = ""
-    let count = 0
-    let index = 0
-    while(index < strMoney.length){
-        if(count == 3){
-            res = "."  + res
-            count = 0
-        }
-        res = strMoney[index] + res
-        count++;
-        index++
-    }
-    return res
-  }
+
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
-    <View style={styles.container}>
-      <View style={{flexGrow: 1, display:'flex', flexDirection:'row', gap: 10}}>
+    <Pressable
+      style={styles.container}
+      onPress={() => navigation.navigate(RootScreens.DETAIL, props)}
+    >
+      <View
+        style={{ flexGrow: 1, display: "flex", flexDirection: "row", gap: 10 }}
+      >
         <View
           style={[
             styles.iconContainer,
@@ -79,14 +94,32 @@ export const TransactionItem = (props: TransactionProps) => {
         </View>
         <View style={{ display: "flex", justifyContent: "space-between" }}>
           <Text style={gStyles.title3}>{props.title}</Text>
-          <Text style={{fontSize: FontSize.SMALL - 1, color:Colors.LIGHT_GRAY}}>{props.description}</Text>
+          <Text
+            style={{ fontSize: FontSize.SMALL - 1, color: Colors.LIGHT_GRAY }}
+          >
+            {props.description}
+          </Text>
         </View>
       </View>
       <View style={{ display: "flex", justifyContent: "space-between" }}>
-        <Text style={{color: (props.transac_type == TransacType.Income) ? Colors.GREEN_80 : Colors.WARN, fontWeight:'600', fontSize:17}}>{(props.transac_type == TransacType.Income) ? "+ " : "- "}{moneyConvert(props.money)}đ</Text>
-        <Text style={{textAlign:'right', color:Colors.LIGHT_GRAY}}>{props.time}</Text>
+        <Text
+          style={{
+            color:
+              props.transac_type == TransacType.Income
+                ? Colors.GREEN_80
+                : Colors.WARN,
+            fontWeight: "600",
+            fontSize: 17,
+          }}
+        >
+          {props.transac_type == TransacType.Income ? "+ " : "- "}
+          {moneyConvert(props.money)}đ
+        </Text>
+        <Text style={{ textAlign: "right", color: Colors.LIGHT_GRAY }}>
+          {props.time}
+        </Text>
       </View>
-    </View>
+    </Pressable>
   );
 };
 const styles = StyleSheet.create({
@@ -97,7 +130,7 @@ const styles = StyleSheet.create({
     display: "flex",
     flexDirection: "row",
     paddingVertical: 8,
-    paddingHorizontal: 10
+    paddingHorizontal: 10,
   },
   iconContainer: {
     padding: 10,

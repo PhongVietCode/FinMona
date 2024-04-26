@@ -59,7 +59,7 @@ export const MainNavigator = () => {
         tabBarHideOnKeyboard: true,
         tabBarStyle: {
           paddingVertical: Platform.OS == "ios" ? 20 : 0,
-          padding: 10,
+          paddingHorizontal: 10,
           height: 70,
         },
       }}

@@ -9,6 +9,8 @@ import { OnboardContainer } from "@/Screens/Onboard";
 import LoginContainer from "@/Screens/Login/LoginContainer";
 import { SignUpContainer } from "@/Screens/SignUp";
 import { AddTransactionContainer } from "@/Screens/Add_Transaction";
+import { TransacDetailContainer } from "@/Screens/TransacDetail/TransacDetailContainer";
+import { TransacCategory, TransacType, TransactionProps } from "@/Components/TransactionItem/TransactionItem";
 
 export type RootStackParamList = {
   [RootScreens.MAIN]: undefined;
@@ -17,6 +19,8 @@ export type RootStackParamList = {
   [RootScreens.LOGIN]: undefined;
   [RootScreens.SIGNUP]: undefined;
   [RootScreens.ADDTRANS]:undefined;
+  [RootScreens.DETAIL]:TransactionProps;
+
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -49,6 +53,10 @@ const ApplicationNavigator = () => {
           name={RootScreens.WELCOME}
           component={WelcomeContainer}
         /> */}
+        <RootStack.Screen
+          name={RootScreens.DETAIL}
+          component={TransacDetailContainer}
+        />
         <RootStack.Screen
           name={RootScreens.MAIN}
           component={MainNavigator}
