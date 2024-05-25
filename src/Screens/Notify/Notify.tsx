@@ -27,8 +27,9 @@ export const Notify: FunctionComponent = () => {
       <FlatList
         contentContainerStyle={{
           paddingHorizontal: 16,
-          paddingBottom:20,
+          paddingBottom:10,
           gap: 10,
+          flexGrow:1 
         }}
         data={data}
         renderItem={({ item }) => (

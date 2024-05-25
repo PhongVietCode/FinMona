@@ -2,20 +2,27 @@ import { gStyles } from "@/Theme";
 import { Colors, FontSize } from "@/Theme/Variables";
 import { ScrollView } from "native-base";
 import { ReactNode, useRef, useState } from "react";
-import { Text } from "react-native";
+import { Pressable, Text } from "react-native";
 import { StyleSheet, View } from "react-native";
 import { BottomSheet } from "react-native-btr";
 import { TransacItem } from "../TransacItem/TransacItem";
 import CirclePlus from "../../../assets/icons/circle-plus.svg";
 import { BigButton } from "../BigButton/BigButton";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "@/Navigation";
+import AddIcon from "../../../assets/icons/circle-plus.svg";
+import { RootScreens } from "@/Screens";
+import { Tag } from "@/Services";
 export interface BottomSheetProps {
   show: any;
-  setShow: () => void;
-  list: { icon: ReactNode[]; lable: string }[];
+  setShow: any;
+  list?: Tag[];
   label: string;
+  onPress: (item: Tag) => void;
 }
 export const BottomSheetItemList = (props: BottomSheetProps) => {
-  const [choosenItem, setChoosenItem] = useState();
+  const [choosenItem, setChoosenItem] = useState<Tag>();
   return (
     <BottomSheet visible={props.show} onBackdropPress={props.setShow}>
       <View
@@ -37,7 +44,17 @@ export const BottomSheetItemList = (props: BottomSheetProps) => {
           }}
         />
         <View style={{ width: "100%", gap: 14, flex: 1 }}>
-          <Text style={[gStyles.title2, { fontSize: 24 }]}>{props.label}</Text>
+          <View
+            style={{
+              flexDirection: "row",
+              alignItems: "center",
+              justifyContent: "space-between",
+            }}
+          >
+            <Text style={[gStyles.title2, { fontSize: 24 }]}>
+              {props.label}
+            </Text>
+          </View>
           <ScrollView
             style={{ height: 400 }}
             contentContainerStyle={{
@@ -48,32 +65,27 @@ export const BottomSheetItemList = (props: BottomSheetProps) => {
               gap: 8,
               justifyContent: "space-around",
             }}
-            key={(item: any) => item.icon}
           >
-            {props.list.map((item: any) => (
+            {props.list?.map((item: Tag, index) => (
               <TransacItem
                 onPress={() => setChoosenItem(item)}
                 isChoosen={choosenItem == item}
-                icon={item.icon}
-                label={item.lable}
+                // icon={item.icon}
+                label={item.title}
+                key={index}
               />
             ))}
           </ScrollView>
-          <View style={{ alignSelf: "flex-start" }}>
-            <TransacItem
-              onPress={() => {}}
-              isChoosen={false}
-              icon={[<CirclePlus fill={Colors.PRIMARY} />]}
-              label={"Add"}
-            />
-          </View>
         </View>
         <BigButton
           text={"Done"}
           backgroundColor={Colors.PRIMARY}
           textColors={Colors.WHITE}
           icon={undefined}
-          onPress={props.setShow}
+          onPress={() => {
+            props.onPress(choosenItem!);
+            props.setShow();
+          }}
           textStyle={FontSize.REGULAR}
         ></BigButton>
       </View>

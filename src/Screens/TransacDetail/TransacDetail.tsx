@@ -7,43 +7,17 @@ import { useNavigation, useRoute } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/Navigation";
 import {
-  TransacCategory,
-  TransactionProps,
+  Transaction,
   moneyConvert,
 } from "@/Components/TransactionItem/TransactionItem";
-import { MoneySource } from "../Add_Transaction/AddTransaction";
 import { BigButton } from "@/Components/BigButton/BigButton";
 export const TransacDetail = () => {
   // const item = props.route.params;
   // const navigation = props.navigation;
   const route = useRoute();
-  const params = route.params as TransactionProps;
+  const params = route.params as Transaction;
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-  const getCategory = (cate: TransacCategory) => {
-    switch (cate) {
-      case TransacCategory.Food:
-        return "Food";
-      case TransacCategory.Party:
-        return "Party";
-      case TransacCategory.Shopping:
-        return "Shopping";
-      case TransacCategory.Transport:
-        return "Transport";
-    }
-  };
-  const getSource = (src: MoneySource) => {
-    switch (src) {
-      case MoneySource.Bank:
-        return "Bank";
-      case MoneySource.Borrow:
-        return "Borrow";
-      case MoneySource.Card:
-        return "Card";
-      case MoneySource.Cash:
-        return "Cash";
-    }
-  };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.BACKGROUND }}>
       <Header
@@ -64,10 +38,10 @@ export const TransacDetail = () => {
         }}
       >
         <Text style={[gStyles.title1, { fontSize: 32 }]}>
-          {moneyConvert(params.money)}đ
+          {moneyConvert(params.amount)}đ
         </Text>
         <Text style={[gStyles.title3, { color: Colors.LIGHT_GRAY }]}>
-          {params.time}
+          {params.dateCreated}
         </Text>
       </View>
       <View
@@ -91,18 +65,18 @@ export const TransacDetail = () => {
           <View style={styles.typeContainer}>
             <Text style={styles.typeLabel}>Type</Text>
             <Text style={styles.typeContent}>
-              {params.transac_type ? "Income" : "Expense"}
+              {params.isIncome ? "Income" : "Expense"}
             </Text>
           </View>
           <View style={styles.typeContainer}>
             <Text style={styles.typeLabel}>Category</Text>
             <Text style={styles.typeContent}>
-              {getCategory(params.category)}
+              {params.category.split("_")[1]}
             </Text>
           </View>
           <View style={styles.typeContainer}>
             <Text style={styles.typeLabel}>Wallet</Text>
-            <Text style={styles.typeContent}>{getSource(params.source)}</Text>
+            <Text style={styles.typeContent}>{params.moneySource.split("_")[0]}</Text>
           </View>
         </View>
         <View

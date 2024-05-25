@@ -1,9 +1,9 @@
-import { user_api as user_api } from "../base";
+import {API } from "../base";
 export interface User {
   id: string,
-  name: string,
   email: string, 
   avatar: string,
+  username: string
 }
 export interface UserSignInInfo {
   name: string,
@@ -15,12 +15,7 @@ export interface UserLoginInfo{
   email: string, 
   password: string,
 }
-
-// const saveTokenInfo = (token) => {
-//   token = 1 // save token to local storage
-//   return 1
-// }
-const userApi = user_api.injectEndpoints({
+const userApi = API.injectEndpoints({
   endpoints: (build) => ({
     postUser: build.query<UserSignInInfo, {statusCode: number, message: string}>({
       query: () => 'users'
@@ -31,8 +26,11 @@ const userApi = user_api.injectEndpoints({
     getUser: build.query<User, string>({
       query: (id) => `users/${id}`,
     }),
+    getAllUser: build.query<User, void>({
+      query: () => 'users'
+    })
   }),
   overrideExisting: true,
 });
 
-export const { useLazyGetUserQuery } = userApi;
+export const { useLazyGetUserQuery, useLazyGetAllUserQuery } = userApi;

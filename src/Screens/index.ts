@@ -8,5 +8,6 @@ export enum RootScreens {
   LOGIN = "Login",
   SIGNUP = "Sign up",
   ADDTRANS = "Add Transaction",
-  DETAIL = "Detail Transaction"
+  DETAIL = "Detail Transaction",
+  TAG = "Tag"
 }

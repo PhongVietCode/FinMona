@@ -1,10 +1,10 @@
 import {
-  TransactionProps,
+  Transaction,
 } from "@/Components/TransactionItem/TransactionItem";
 import { createSlice } from "@reduxjs/toolkit";
 
 interface TransactionState {
-  transaclist: TransactionProps[];
+  transaclist: Transaction[];
 }
 
 const initialState: TransactionState = {

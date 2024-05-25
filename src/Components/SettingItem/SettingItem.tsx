@@ -1,4 +1,4 @@
-import { Text, View } from "react-native";
+import { Pressable, Text, View } from "react-native";
 import { ReactNode } from "react";
 import { Colors } from "@/Theme/Variables";
 import { gStyles } from "@/Theme";
@@ -8,10 +8,11 @@ interface SettingItemProps {
   label: string;
   des: string;
   rightIcon: ReactNode;
+  onPress: () => void;
 }
 export const SettingItem = (props: SettingItemProps) => {
   return (
-    <View
+    <Pressable
       style={{
         display: "flex",
         flexDirection: "row",
@@ -20,13 +21,20 @@ export const SettingItem = (props: SettingItemProps) => {
         paddingVertical: 8,
         paddingHorizontal: 12,
       }}
+      onPress={props.onPress}
     >
-      <View style={{flexDirection:'row', gap: 8}}>
-        <View style={{ padding: 16, backgroundColor: Colors.STROKE, borderRadius: 17 }}>
+      <View style={{ flexDirection: "row", gap: 8 }}>
+        <View
+          style={{
+            padding: 16,
+            backgroundColor: Colors.STROKE,
+            borderRadius: 17,
+          }}
+        >
           {props.icon}
         </View>
         <View style={{ flexDirection: "column", gap: 5 }}>
-          <Text style={[gStyles.title3, {fontSize: 16}]}>{props.label}</Text>
+          <Text style={[gStyles.title3, { fontSize: 16 }]}>{props.label}</Text>
           <Text
             style={[
               gStyles.title3,
@@ -38,6 +46,6 @@ export const SettingItem = (props: SettingItemProps) => {
         </View>
       </View>
       {props.rightIcon}
-    </View>
+    </Pressable>
   );
 };

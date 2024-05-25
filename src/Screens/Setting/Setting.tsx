@@ -9,15 +9,23 @@ import { NotificationItem } from "@/Components/NotificationItem/NotificationItem
 import { SettingItem } from "@/Components/SettingItem/SettingItem";
 import ArrowRight from "../../../assets/icons/chevron-right.svg";
 import { BigButton } from "@/Components/BigButton/BigButton";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "@/Navigation";
+import { RootScreens } from "..";
 
 export const Setting: FunctionComponent = () => {
   const userImg = require("../../../assets/user_img.png");
-
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.BACKGROUND }}>
       <Header
         left={<View></View>}
-        right={<View></View>}
+        right={
+          <View>
+          </View>
+        }
         center={<Text style={gStyles.title1}>Setting</Text>}
       />
       <View
@@ -70,26 +78,37 @@ export const Setting: FunctionComponent = () => {
         }}
       >
         <Text style={[gStyles.title3, { fontSize: 18 }]}>Setting: </Text>
-        {[...Array(4).keys()].map(() => (
+        {[...Array(4).keys()].map((i) => (
           <SettingItem
             icon={<Pencil fill={Colors.TEXT_BOLD} />}
             label={"Setting item"}
             des={"Setting item"}
             rightIcon={<ArrowRight width={18} fill={Colors.TEXT_BOLD} />}
+            onPress={() => {}}
+            key={i}
           />
         ))}
-        
+
         <Text style={[gStyles.title3, { fontSize: 18, marginVertical: 8 }]}>
           Category/Account:{" "}
         </Text>
-        {[...Array(2).keys()].map(() => (
+        {[...Array(1).keys()].map((i) => (
           <SettingItem
             icon={<Pencil fill={Colors.TEXT_BOLD} />}
             label={"Setting item"}
             des={"Setting item"}
             rightIcon={<ArrowRight width={18} fill={Colors.TEXT_BOLD} />}
+            onPress={() => {}}
+            key={i}
           />
         ))}
+        <SettingItem
+          icon={<Pencil fill={Colors.TEXT_BOLD} />}
+          label={"Add More Icon"}
+          des={"This feature is for Premium User"}
+          rightIcon={<ArrowRight width={18} fill={Colors.TEXT_BOLD} />}
+          onPress={() => navigation.navigate(RootScreens.TAG)}
+        />
         <BigButton
           text={"Logout"}
           backgroundColor={Colors.WARN}

@@ -1,74 +1,55 @@
 import { RootStackParamList } from "@/Navigation";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import {
-  Dimensions,
-  Platform,
-  Pressable,
-  StyleSheet,
-  Text,
-  View,
-  Modal,
-} from "react-native";
+import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
 import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import { Colors, FontSize } from "@/Theme/Variables";
 import { Header } from "@/Components/Header/Header";
 import { gStyles } from "@/Theme";
-import { ReactNode, useState } from "react";
+import { useEffect, useState } from "react";
 import { FlatList, Input, ScrollView } from "native-base";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { InputItem } from "@/Components/Input/InputItem";
 import DateTimePicker from "@react-native-community/datetimepicker";
-import CanlendarIcon from "../../../assets/icons/calender-alt-1.svg";
 import { TextInput } from "react-native-paper";
-import { TransacCategory } from "@/Components/TransactionItem/TransactionItem";
 import { Switch } from "react-native-paper";
 import { BigButton } from "@/Components/BigButton/BigButton";
 import { BottomSheetItemList } from "@/Components/BottomSheet/BottomSheetItemList";
 import { BottomSheet } from "react-native-btr";
-import { TransacItem } from "@/Components/TransacItem/TransacItem";
 import BankIcon from "../../../assets/icons/bank.svg";
-import CirclePlus from "../../../assets/icons/circle-plus.svg";
 import { DropDown } from "@/Components/DropDown/DropDown";
-export enum MoneySource {
-  Bank,
-  Cash,
-  Card,
-  Borrow,
-}
+import { Transaction } from "@/Components/TransactionItem/TransactionItem";
+import {
+  Tag,
+  getIDFromLocalStorage,
+  useAddRecordMutation,
+  useLazyGetAllTagsQuery,
+} from "@/Services";
 export const AddTransaction = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  const initialForm: Omit<Transaction, "id" | "dateCreated" | "user"> = {
+    isIncome: true,
+    repeat: false,
+    amount: 0,
+    category: "",
+    moneySource: "",
+    description: "",
+    dateRepeat: "",
+  };
   const types = ["Income", "Expense"];
   const [transType, setTransType] = useState(types[0]);
   const [date, setDate] = useState(new Date(Date.now()));
   const [open, setOpen] = useState(false);
   const [isRepeated, setIsRepeated] = useState(false);
-  const getMoneySource = (src: any) => {
-    if (src == MoneySource.Bank) return "Bank";
-    if (src == MoneySource.Cash) return "Cash";
-    if (src == MoneySource.Card) return "Card";
-    if (src == MoneySource.Borrow) return "Borrow";
-    return "";
-  };
-  const getCategory = (cat: any) => {
-    if (cat == TransacCategory.Food) return "Food";
-    if (cat == TransacCategory.Shopping) return "Shopping";
-    if (cat == TransacCategory.Party) return "Party";
-    if (cat == TransacCategory.Transport) return "Transport";
-    return "";
-  };
-  const [form, setForm] = useState({
-    date: "",
-    moneySource: Number,
-    category: "",
-    amount: "",
-    description: "",
-    repeat: Boolean,
-  });
+  const [form, setForm] =
+    useState<Omit<Transaction, "id" | "dateCreated" | "user">>(initialForm);
+
   const [showMoneySource, setShowMoneySource] = useState(false);
   const [showMoneyCategory, setshowMoneyCategory] = useState(false);
   const [showRepeat, setShowRepeat] = useState(false);
+
   const [moneySourceList, setMoneySourceList] = useState([
     {
       icon: [
@@ -262,14 +243,25 @@ export const AddTransaction = () => {
       lable: "Bank",
     },
   ]);
+
+  const [addRecord, addRecordResult] = useAddRecordMutation();
+
+  const [fetchTag, { data, isLoading, isFetching }] = useLazyGetAllTagsQuery();
+
+  useEffect(() => {
+    fetchTag({ id: getIDFromLocalStorage() });
+  }, [data]);
+  const handleSave = (e: any) => {
+    addRecord({ id: getIDFromLocalStorage(), body: form });
+    console.log(form)
+  };
   return (
     <SafeAreaView style={styles.container}>
       <Header
         left={
-          <ArrowLeft
-            fill={Colors.TEXT_BOLD}
-            onPress={() => navigation.goBack()}
-          />
+          <Pressable onPress={() => navigation.goBack()}>
+            <ArrowLeft fill={Colors.TEXT_BOLD} />
+          </Pressable>
         }
         center={null}
         right={<Text style={[gStyles.title1]}>{transType}</Text>}
@@ -289,7 +281,10 @@ export const AddTransaction = () => {
               data={types}
               renderItem={({ item, index }) => (
                 <Pressable
-                  onPress={() => setTransType(types[index])}
+                  onPress={() => {
+                    setTransType(types[index]);
+                    setForm({ ...form, isIncome: Boolean(1 - index) });
+                  }}
                   style={[
                     styles.tabBtn,
                     {
@@ -297,6 +292,7 @@ export const AddTransaction = () => {
                         transType == item ? Colors.PRIMARY : Colors.TRANSPARENT,
                     },
                   ]}
+                  key={index}
                 >
                   <Text
                     style={[
@@ -316,12 +312,12 @@ export const AddTransaction = () => {
           <View>
             <InputItem
               showKeyboard={false}
-              value={date.toString()}
+              value={form.dateRepeat}
               label="Date"
-              onChangeText={() => {
-                setForm({ ...form, date: date.toString() });
+              onChangeText={(date) => {
+                setForm({ ...form, dateRepeat: date.toString() });
               }}
-              placeholder="dd/mm/yyyy"
+              placeholder="dd-mm-yyyy"
               right={
                 <TextInput.Icon
                   icon={"calendar"}
@@ -334,33 +330,53 @@ export const AddTransaction = () => {
               }
             />
           </View>
-
+          {open && (
+            <DateTimePicker
+              value={date}
+              mode={"date"}
+              is24Hour={true}
+              aria-modal
+              onChange={(event, date) => {
+                setOpen(false);
+                if (date) {
+                  setDate(date);
+                  const choosenDate =
+                    date.getDate() +
+                    "-" +
+                    date.getMonth() +
+                    "-" +
+                    date.getFullYear();
+                  setForm({ ...form, dateRepeat: choosenDate });
+                }
+              }}
+            />
+          )}
           <View style={{ display: "flex", flexDirection: "row", gap: 10 }}>
             <InputItem
               showKeyboard={false}
-              value={getMoneySource(form.moneySource)}
+              value={form.moneySource.split("_")[0]}
               label="Money Source*: "
               onChangeText={(moneySource: any) =>
                 setForm({ ...form, moneySource })
               }
-              placeholder="Bank"
+              placeholder="...."
               right={
                 <TextInput.Icon
                   icon={"chevron-down"}
                   color={Colors.LIGHT_GRAY}
                   onPress={(e) => {
-                    console.log("phong");
                     setShowMoneySource(true);
                   }}
                 />
               }
             />
+
             <InputItem
               showKeyboard={false}
-              value={getCategory(form.category)}
+              value={form.category.split("_")[0]}
               label="Category*: "
               onChangeText={(category: any) => setForm({ ...form, category })}
-              placeholder="Shopping"
+              placeholder="...."
               right={
                 <TextInput.Icon
                   icon={"chevron-down"}
@@ -375,10 +391,12 @@ export const AddTransaction = () => {
           <View>
             <InputItem
               showKeyboard={true}
-              value={form.amount}
+              value={String(form.amount)}
               label="How much? *: "
-              onChangeText={(amount: any) => setForm({ ...form, amount })}
-              placeholder="000.000đ"
+              onChangeText={(amount: any) =>
+                setForm({ ...form, amount: Number(amount) })
+              }
+              placeholder="xxx.xxxd"
               right={null}
             />
           </View>
@@ -414,6 +432,7 @@ export const AddTransaction = () => {
               onValueChange={() => {
                 setIsRepeated(!isRepeated);
                 setShowRepeat(!isRepeated);
+                // setForm({...form})
               }}
             />
           </View>
@@ -423,7 +442,10 @@ export const AddTransaction = () => {
               backgroundColor={Colors.PRIMARY}
               textColors={Colors.WHITE}
               icon={undefined}
-              onPress={() => navigation.goBack()}
+              onPress={(e: any) => {
+                navigation.goBack();
+                handleSave(e);
+              }}
               textStyle={FontSize.REGULAR}
             ></BigButton>
             <BigButton
@@ -431,7 +453,10 @@ export const AddTransaction = () => {
               backgroundColor={Colors.TRANSPARENT}
               textColors={Colors.LIGHT_GRAY}
               icon={undefined}
-              onPress={() => navigation.goBack()}
+              onPress={() => {
+                navigation.goBack();
+                setForm(initialForm);
+              }}
               textStyle={FontSize.REGULAR}
             ></BigButton>
           </View>
@@ -439,13 +464,22 @@ export const AddTransaction = () => {
             label="Money Source: "
             show={showMoneySource}
             setShow={() => setShowMoneySource(!showMoneySource)}
-            list={moneySourceList}
+            list={data?.filter((item) => item.type === "Money Source")}
+            onPress={(choosenItem: Tag) =>
+              setForm({
+                ...form,
+                moneySource: choosenItem?.title,
+              })
+            }
           />
           <BottomSheetItemList
             label="Category: "
             show={showMoneyCategory}
             setShow={() => setshowMoneyCategory(!showMoneyCategory)}
-            list={moneyCatList}
+            list={data?.filter((item) => item.type === "Category")}
+            onPress={(choosenItem: Tag) =>
+              setForm({ ...form, category: choosenItem.title })
+            }
           />
           <BottomSheet
             visible={showRepeat}
@@ -469,7 +503,7 @@ export const AddTransaction = () => {
                   borderRadius: 50,
                 }}
               />
-              <View style={{flex: 1}}>
+              <View style={{ flex: 1 }}>
                 <DropDown />
               </View>
               <BigButton
@@ -482,19 +516,6 @@ export const AddTransaction = () => {
               ></BigButton>
             </View>
           </BottomSheet>
-          {open && (
-            <DateTimePicker
-              value={date}
-              mode={"date"}
-              is24Hour={true}
-              onChange={(event, date) => {
-                setOpen(false);
-                if (date) {
-                  setDate(date);
-                }
-              }}
-            />
-          )}
         </View>
       </ScrollView>
     </SafeAreaView>

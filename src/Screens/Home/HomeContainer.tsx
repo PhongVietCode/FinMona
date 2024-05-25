@@ -1,16 +1,13 @@
 import { Home } from "./Home";
-import React, { useState, useEffect } from "react";
-import { useLazyGetUserQuery } from "@/Services";
+import React, { useState, useEffect, useId } from "react";
+import { getIDFromLocalStorage, useLazyGetAllRecordsQuery, useLazyGetAllUserQuery, useLazyGetUserQuery } from "@/Services";
 
 export const HomeContainer = () => {
-  const [userId, setUserId] = useState("9");
-
-  const [fetchOne, { data, isSuccess, isLoading, isFetching, error }] =
-    useLazyGetUserQuery();
+  const [fetchRecords,{data, isLoading, isFetching}] = useLazyGetAllRecordsQuery()
 
   useEffect(() => {
-    fetchOne(userId);
-  }, [fetchOne, userId]);
-  
-  return <Home/>;
+    fetchRecords({id: getIDFromLocalStorage()});
+  }, [data]);
+
+  return <Home data={data} isLoading={isLoading} isFetching={isFetching} />;
 };

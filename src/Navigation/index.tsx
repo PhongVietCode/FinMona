@@ -10,7 +10,12 @@ import LoginContainer from "@/Screens/Login/LoginContainer";
 import { SignUpContainer } from "@/Screens/SignUp";
 import { AddTransactionContainer } from "@/Screens/Add_Transaction";
 import { TransacDetailContainer } from "@/Screens/TransacDetail/TransacDetailContainer";
-import { TransacCategory, TransacType, TransactionProps } from "@/Components/TransactionItem/TransactionItem";
+import {
+  Category,
+  TransacType,
+  Transaction,
+} from "@/Components/TransactionItem/TransactionItem";
+import { AddTagContainer } from "@/Screens/Add_Tag";
 
 export type RootStackParamList = {
   [RootScreens.MAIN]: undefined;
@@ -18,9 +23,9 @@ export type RootStackParamList = {
   [RootScreens.ONBOARD]: undefined;
   [RootScreens.LOGIN]: undefined;
   [RootScreens.SIGNUP]: undefined;
-  [RootScreens.ADDTRANS]:undefined;
-  [RootScreens.DETAIL]:TransactionProps;
-
+  [RootScreens.ADDTRANS]: undefined;
+  [RootScreens.DETAIL]: Transaction;
+  [RootScreens.TAG]: undefined;
 };
 
 const RootStack = createNativeStackNavigator<RootStackParamList>();
@@ -31,7 +36,7 @@ const ApplicationNavigator = () => {
     <NavigationContainer>
       <StatusBar />
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        <RootStack.Screen 
+        <RootStack.Screen
           name={RootScreens.ONBOARD}
           component={OnboardContainer}
         />
@@ -68,6 +73,7 @@ const ApplicationNavigator = () => {
           name={RootScreens.ADDTRANS}
           component={AddTransactionContainer}
         />
+        <RootStack.Screen name={RootScreens.TAG} component={AddTagContainer} />
       </RootStack.Navigator>
     </NavigationContainer>
   );

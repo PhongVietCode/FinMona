@@ -24,13 +24,10 @@ import ArrowLeft from "../../../assets/icons/chevron-left.svg";
 import ArrowRight from "../../../assets/icons/chevron-right.svg";
 import { PieChart } from "react-native-chart-kit";
 import {
-  TransacCategory,
-  TransacType,
   TransactionItem,
-  TransactionProps,
+  Transaction,
   transactionStyle,
 } from "@/Components/TransactionItem/TransactionItem";
-import { MoneySource } from "../Add_Transaction/AddTransaction";
 import Animated, {
   Easing,
   FadeInDown,
@@ -43,15 +40,18 @@ import Animated, {
   withSpring,
   withTiming,
 } from "react-native-reanimated";
-import { useFocusEffect } from "@react-navigation/native";
 import ShoppingIcon from "../../../assets/icons/shopping-bag-14.svg";
 import Food from "../../../assets/icons/Food.svg";
 import TransportIcon from "../../../assets/icons/school-bus.svg";
 import PartyIcon from "../../../assets/icons/party horn.svg";
 import { MotiScrollView, MotiView } from "moti";
 import { Skeleton } from "moti/skeleton";
-export const Statistic: FunctionComponent = () => {
-  const [isLoading, setIsLoading] = useState(false);
+import { getIDFromLocalStorage, useLazyGetAllRecordsQuery } from "@/Services";
+
+export const Statistic = () => {
+  const [fetchRecords,{data, isLoading, isFetching}] = useLazyGetAllRecordsQuery()
+
+  
   const listChoice = ["Chart", "List Item", "Note"];
   const listIcon = [
     <ShoppingIcon fill={Colors.WHITE} />,
@@ -105,45 +105,33 @@ export const Statistic: FunctionComponent = () => {
       setViewTime({ ...viewTime, month: months[monthIndex] });
     }
   };
-  const transac_list: TransactionProps[] = [];
-  for (let i = 0; i < 40; i++) {
-    transac_list.push({
-      source: MoneySource.Bank,
-      transac_type: TransacType.Income,
-      category: TransacCategory.Shopping,
-      description: "This is for testing",
-      title: "Buy me food",
-      money: 102101,
-      time: "10:09 AM",
-      index: i,
-    });
-  }
-  const data = [
+  const [recordList, setRecordList] = useState(data)
+  const graphData = [
     {
       name: "Food",
       percent: 10,
-      color: transactionStyle(TransacCategory.Food).backgroundIconColor,
+      color: transactionStyle("Food")?.backgroundIconColor,
       legendFontColor: "#7F7F7F",
       legendFontSize: 15,
     },
     {
       name: "Party",
       percent: 20,
-      color: transactionStyle(TransacCategory.Party).backgroundIconColor,
+      color: transactionStyle("Party")?.backgroundIconColor,
       legendFontColor: "#7F7F7F",
       legendFontSize: 15,
     },
     {
       name: "Transport",
       percent: 40,
-      color: transactionStyle(TransacCategory.Transport).backgroundIconColor,
+      color: transactionStyle("Transport")?.backgroundIconColor,
       legendFontColor: "#7F7F7F",
       legendFontSize: 15,
     },
     {
       name: "Shopping",
       percent: 30,
-      color: transactionStyle(TransacCategory.Shopping).backgroundIconColor,
+      color: transactionStyle("Shopping")?.backgroundIconColor,
       legendFontColor: "#7F7F7F",
       legendFontSize: 15,
     },
@@ -168,6 +156,23 @@ export const Statistic: FunctionComponent = () => {
       opacity: opacity.value,
     };
   });
+  useEffect(() => {
+    fetchRecords({id: getIDFromLocalStorage()});
+    if(transType == "Income"){
+      setRecordList(data?.filter((item: Transaction) => item.isIncome == true))
+    }
+    else{
+      setRecordList(data?.filter((item: Transaction) => item.isIncome == false))
+    }
+  }, [data]);
+  useEffect(() => {
+    if(transType == "Income"){
+      setRecordList(data?.filter((item: Transaction) => item.isIncome == true))
+    }
+    else{
+      setRecordList(data?.filter((item: Transaction) => item.isIncome == false))
+    }
+  }, [transType]);
   // yOffset.value = withTiming(0);
   // xOffset.value = withTiming(0);
   // opacity.value = withTiming(0, { duration: 100 });
@@ -342,7 +347,7 @@ export const Statistic: FunctionComponent = () => {
                 <Animated.View style={[graphAnimated]}>
                   <PieChart
                     paddingLeft={"0"}
-                    data={data}
+                    data={graphData}
                     width={Dimensions.get("screen").width}
                     height={300}
                     chartConfig={chartConfig}
@@ -523,17 +528,11 @@ export const Statistic: FunctionComponent = () => {
         ) : (
           <FlatList
             contentContainerStyle={{ gap: 10, paddingBottom: 10, flexGrow: 1 }}
-            data={transac_list}
-            renderItem={({ item }) => (
+            data={recordList}
+            renderItem={({ item, index }) => (
               <TransactionItem
-                source={item.source}
-                transac_type={item.transac_type}
-                description={item.description}
-                title={item.title}
-                money={item.money}
-                time={item.time}
-                category={item.category}
-                index={item.index}
+                {...item}
+                key={index}
               />
             )}
           />

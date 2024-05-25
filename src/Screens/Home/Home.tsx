@@ -9,13 +9,10 @@ import {
   FlatList,
   Pressable,
 } from "react-native";
-import {
-  useDefaultQuery,
-  useGetAllRecordsQuery,
-  useLazyGetUserQuery,
-  User,
-} from "@/Services";
-import AddIcon from "../../../assets/icons/circle-plus.svg";
+import { useLazyGetUserQuery, User } from "@/Services";
+import ArrowDown from "../../../assets/icons/arrow-down-circle.svg";
+import ArrowUp from "../../../assets/icons/arrow-up-circle.svg";
+
 import EyeShow from "../../../assets/icons/eye-alt.svg";
 import Search from "../../../assets/icons/search-alt.svg";
 import { Colors, FontSize } from "@/Theme/Variables";
@@ -28,30 +25,33 @@ import { MotiScrollView, MotiView } from "moti";
 import { Skeleton } from "moti/skeleton";
 
 import {
-  TransacCategory,
   TransactionItem,
-  TransactionProps,
-  TransacType,
+  Transaction,
 } from "@/Components/TransactionItem/TransactionItem";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/Navigation";
-import { MoneySource } from "../Add_Transaction/AddTransaction";
 import Animated, {
   useSharedValue,
   useAnimatedStyle,
   withTiming,
   withSpring,
 } from "react-native-reanimated";
-export const Home = () => {
-  const [isLoading, setIsLoading] = useState(false);
+
+export interface HomeProps {
+  data: Transaction[] | undefined;
+  isLoading: boolean;
+  isFetching: boolean;
+}
+export const Home = (props: HomeProps) => {
+  // const [isLoading, setIsLoading] = useState(false);
 
   const userImg = require("../../../assets/my_img.jpg");
   const [balance, setBalance] = useState("3.000.000");
   const [showBalance, setShowBalance] = useState(false);
   const viewOptions = ["Today", "Week", "Month", "Year"];
   const [selectedTab, setSelectedTab] = useState(viewOptions[0]);
-  const record_list: TransactionProps[] = [];
+  const record_list: Transaction[] = [];
 
   const [recordList, setRecordList] = useState(record_list);
   const graphList = [
@@ -119,22 +119,6 @@ export const Home = () => {
   ];
   const [dataShown, setDataShown] = useState(graphList[0]);
 
-  const {data} = useDefaultQuery()
-  console.log(data)
-
-  for (let i = 0; i < 10; i++) {
-    record_list.push({
-      source: MoneySource.Card,
-      transac_type: TransacType.Expense,
-      category: TransacCategory.Party,
-      description: "This is for testing",
-      title: "Buy me foossssssssssd",
-      money: 102101,
-      time: "10:09 AM",
-      index: i,
-    });
-  }
-
   const chartConfig = {
     backgroundColor: Colors.WHITE,
     backgroundGradientFrom: Colors.WHITE,
@@ -153,6 +137,7 @@ export const Home = () => {
     },
   };
 
+  const [expanded, setExpanded] = useState(true);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
@@ -171,6 +156,28 @@ export const Home = () => {
     opacity.value = withTiming(1, { duration: 500 });
     scale.value = withSpring(1, { duration: 400 });
   }, [selectedTab]);
+
+  const rotate = useSharedValue(0);
+  const scaleGraph = useSharedValue(1);
+  const expandedStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ scale: scaleGraph.value }],
+    };
+  });
+  const rotationStyle = useAnimatedStyle(() => {
+    return {
+      transform: [{ rotateZ: `${rotate.value}deg` }],
+    };
+  }, []);
+  useEffect(() => {
+    if (expanded) {
+      rotate.value = withTiming(180, { duration: 100 });
+      scaleGraph.value = withTiming(1, { duration: 400 });
+    } else {
+      rotate.value = withTiming(0, { duration: 200 });
+      scaleGraph.value = withTiming(0, { duration: 100 });
+    }
+  }, [expanded]);
 
   return (
     <SafeAreaView style={styles.container}>
@@ -191,7 +198,7 @@ export const Home = () => {
                 { color: Colors.TEXT_BOLD, fontWeight: "700" },
               ]}
             >
-              Quoc Phong!
+              User name
             </Text>
           </View>
         }
@@ -249,25 +256,46 @@ export const Home = () => {
         </View>
         {/* ========= */}
         <View style={{ paddingVertical: 5 }}>
-          <Text
-            style={[
-              gStyles.title2,
-              { fontSize: 18, alignSelf: "flex-start", fontWeight: "700" },
-            ]}
+          <View
+            style={{
+              flexDirection: "row",
+              width: "100%",
+              justifyContent: "space-between",
+            }}
           >
-            Spend Recording:{" "}
-          </Text>
-          <Animated.View
-            style={[{ marginTop: 18, width: "100%" }, reanimatedStyle]}
-          >
-            <LineChart
-              width={Dimensions.get("window").width - 52}
-              data={dataShown}
-              height={220}
-              chartConfig={chartConfig}
-              bezier
-            />
-          </Animated.View>
+            <Text
+              style={[
+                gStyles.title2,
+                { fontSize: 18, alignSelf: "flex-start", fontWeight: "700" },
+              ]}
+            >
+              Spend Recording:{" "}
+            </Text>
+            <Animated.View style={[rotationStyle]}>
+              <Pressable onPress={() => setExpanded(!expanded)}>
+                <ArrowUp fill={Colors.TEXT_BOLD} />
+              </Pressable>
+            </Animated.View>
+          </View>
+          {expanded ? (
+            <Animated.View
+              style={[
+                { marginTop: 18, width: "100%" },
+                reanimatedStyle,
+                expandedStyle,
+              ]}
+            >
+              <LineChart
+                width={Dimensions.get("window").width - 52}
+                data={dataShown}
+                height={200}
+                chartConfig={chartConfig}
+                bezier
+              />
+            </Animated.View>
+          ) : (
+            <></>
+          )}
         </View>
         <View style={{ width: "100%", marginVertical: 12 }}>
           <FlatList
@@ -279,7 +307,7 @@ export const Home = () => {
             }}
             data={viewOptions}
             horizontal
-            scrollEnabled={false}
+            scrollEnabled={true}
             renderItem={({ item, index }) => (
               <Pressable
                 onPress={() => {
@@ -297,6 +325,7 @@ export const Home = () => {
                       index == viewOptions.length - 1 ? 10 : 0,
                     borderBottomRightRadius:
                       index == viewOptions.length - 1 ? 10 : 0,
+                    flexGrow: 1,
                   },
                 ]}
               >
@@ -340,7 +369,7 @@ export const Home = () => {
             <Search fill={Colors.TEXT_BOLD} />
           </View>
         </View>
-        {isLoading ? (
+        {props.isLoading ? (
           <MotiScrollView
             contentContainerStyle={{ gap: 10 }}
             transition={{ type: "timing" }}
@@ -360,22 +389,13 @@ export const Home = () => {
         ) : (
           <FlatList
             style={{
-              height: Dimensions.get("screen").height / 3.8,
+              // height: Dimensions.get("screen").height / 3.8,
               paddingBottom: 10,
             }}
             contentContainerStyle={{ rowGap: 10 }}
-            data={recordList}
-            renderItem={({ item }) => (
-              <TransactionItem
-                source={item.source}
-                transac_type={item.transac_type}
-                description={item.description}
-                title={item.title}
-                money={item.money}
-                time={item.time}
-                category={item.category}
-                index={item.index}
-              />
+            data={props.data}
+            renderItem={({ item, index }) => (
+              <TransactionItem {...item} key={index} />
             )}
           />
         )}
@@ -409,7 +429,7 @@ const styles = StyleSheet.create({
     borderRadius: 2,
     border: `1em solid ${Colors.PRIMARY}`,
     paddingVertical: 10,
-    paddingHorizontal: Dimensions.get("screen").width / 16,
+    paddingHorizontal: Dimensions.get("screen").width / 17,
   },
   tabTextStyle: {
     fontWeight: "500",
