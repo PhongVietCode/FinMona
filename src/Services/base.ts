@@ -1,3 +1,4 @@
+import { TransactionProps } from "@/Components/TransactionItem/TransactionItem";
 import { Config } from "@/Config";
 import { BaseQueryApi } from "@reduxjs/toolkit/dist/query/baseQueryTypes";
 import {
@@ -6,7 +7,7 @@ import {
   fetchBaseQuery,
 } from "@reduxjs/toolkit/query/react";
 
-const baseQuery = fetchBaseQuery({ baseUrl: Config.API_URL });
+const baseQuery = fetchBaseQuery({ baseUrl: Config.API_URL }); 
 
 const baseQueryWithInterceptor = async (
   args: string | FetchArgs,
@@ -20,7 +21,15 @@ const baseQueryWithInterceptor = async (
   return result;
 };
 
-export const API = createApi({
+
+export const record_api = createApi({
+  reducerPath: 'record_api',
+  baseQuery: fetchBaseQuery({baseUrl: Config.MY_URL}),
+  endpoints: () => ({})
+})
+
+export const user_api = createApi({
+  reducerPath: "user_api",
   baseQuery: baseQueryWithInterceptor,
   endpoints: () => ({}),
 });

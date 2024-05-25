@@ -70,45 +70,26 @@ export const Setting: FunctionComponent = () => {
         }}
       >
         <Text style={[gStyles.title3, { fontSize: 18 }]}>Setting: </Text>
-        <SettingItem
-          icon={<Pencil fill={Colors.TEXT_BOLD} />}
-          label={"Setting item"}
-          des={"Setting item"}
-          rightIcon={<ArrowRight fill={Colors.TEXT_BOLD} />}
-        />
-        <SettingItem
-          icon={<Pencil fill={Colors.TEXT_BOLD} />}
-          label={"Setting item"}
-          des={"Setting item"}
-          rightIcon={<ArrowRight fill={Colors.TEXT_BOLD} />}
-        />
-        <SettingItem
-          icon={<Pencil fill={Colors.TEXT_BOLD} />}
-          label={"Setting item"}
-          des={"Setting item"}
-          rightIcon={<ArrowRight fill={Colors.TEXT_BOLD} />}
-        />
-        <SettingItem
-          icon={<Pencil fill={Colors.TEXT_BOLD} />}
-          label={"Setting item"}
-          des={"Setting item"}
-          rightIcon={<ArrowRight fill={Colors.TEXT_BOLD} />}
-        />
+        {[...Array(4).keys()].map(() => (
+          <SettingItem
+            icon={<Pencil fill={Colors.TEXT_BOLD} />}
+            label={"Setting item"}
+            des={"Setting item"}
+            rightIcon={<ArrowRight width={18} fill={Colors.TEXT_BOLD} />}
+          />
+        ))}
+        
         <Text style={[gStyles.title3, { fontSize: 18, marginVertical: 8 }]}>
           Category/Account:{" "}
         </Text>
-        <SettingItem
-          icon={<Pencil fill={Colors.TEXT_BOLD} />}
-          label={"Setting item"}
-          des={"Setting item"}
-          rightIcon={<ArrowRight fill={Colors.TEXT_BOLD} />}
-        />
-        <SettingItem
-          icon={<Pencil fill={Colors.TEXT_BOLD} />}
-          label={"Setting item"}
-          des={"Setting item"}
-          rightIcon={<ArrowRight fill={Colors.TEXT_BOLD} />}
-        />
+        {[...Array(2).keys()].map(() => (
+          <SettingItem
+            icon={<Pencil fill={Colors.TEXT_BOLD} />}
+            label={"Setting item"}
+            des={"Setting item"}
+            rightIcon={<ArrowRight width={18} fill={Colors.TEXT_BOLD} />}
+          />
+        ))}
         <BigButton
           text={"Logout"}
           backgroundColor={Colors.WARN}

@@ -4,7 +4,7 @@ import { Colors, FontSize, MetricsSizes } from "./Variables";
 
 export const gStyles = StyleSheet.create({
     title1: {
-        fontSize: FontSize.LARGE,
+        fontSize: FontSize.LARGE + 1,
         fontWeight: '500'
     },
     title2:{

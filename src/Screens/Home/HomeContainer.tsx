@@ -11,6 +11,6 @@ export const HomeContainer = () => {
   useEffect(() => {
     fetchOne(userId);
   }, [fetchOne, userId]);
-
-  return <Home data={data} isLoading={isLoading} />;
+  
+  return <Home/>;
 };

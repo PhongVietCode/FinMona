@@ -41,6 +41,7 @@ const AddNewTransactionButton = (props: any) => (
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
+        
       }}
     >
       <AddIcon width={24} height={24} fill={Colors.WHITE} />
@@ -116,6 +117,8 @@ export const MainNavigator = () => {
         name="Notification"
         component={NotifyContainer}
         options={{
+          tabBarBadge: 1,
+          tabBarBadgeStyle:{backgroundColor: Colors.ERROR,color:Colors.WHITE, fontWeight: '700' },
           tabBarIcon: ({ focused }) => (
             <View style={style.btn_nav}>
               <BellIcon fill={focused ? Colors.PRIMARY : Colors.LIGHT_GRAY} />

@@ -1,5 +1,5 @@
 import { i18n, LocalizationKey } from "@/Localization";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import {
   View,
   Text,
@@ -9,18 +9,24 @@ import {
   FlatList,
   Pressable,
 } from "react-native";
-import { StatusBar } from "expo-status-bar";
-import { HStack, Spinner, Heading, Container, ScrollView } from "native-base";
-import { User } from "@/Services";
+import {
+  useDefaultQuery,
+  useGetAllRecordsQuery,
+  useLazyGetUserQuery,
+  User,
+} from "@/Services";
 import AddIcon from "../../../assets/icons/circle-plus.svg";
 import EyeShow from "../../../assets/icons/eye-alt.svg";
 import Search from "../../../assets/icons/search-alt.svg";
-import { Colors, FontSize, MetricsSizes } from "@/Theme/Variables";
+import { Colors, FontSize } from "@/Theme/Variables";
 import { Header } from "@/Components/Header/Header";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { gStyles } from "@/Theme";
 import { LineChart } from "react-native-chart-kit";
 import EyeSlash from "../../../assets/icons/eye-slash.svg";
+import { MotiScrollView, MotiView } from "moti";
+import { Skeleton } from "moti/skeleton";
+
 import {
   TransacCategory,
   TransactionItem,
@@ -31,14 +37,24 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/Navigation";
 import { MoneySource } from "../Add_Transaction/AddTransaction";
-export interface IHomeProps {
-  data: User | undefined;
-  isLoading: boolean;
-}
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+  withSpring,
+} from "react-native-reanimated";
+export const Home = () => {
+  const [isLoading, setIsLoading] = useState(false);
 
-export const Home = (props: IHomeProps) => {
-  // const { data, isLoading } = props;
-  const data = [
+  const userImg = require("../../../assets/my_img.jpg");
+  const [balance, setBalance] = useState("3.000.000");
+  const [showBalance, setShowBalance] = useState(false);
+  const viewOptions = ["Today", "Week", "Month", "Year"];
+  const [selectedTab, setSelectedTab] = useState(viewOptions[0]);
+  const record_list: TransactionProps[] = [];
+
+  const [recordList, setRecordList] = useState(record_list);
+  const graphList = [
     {
       labels: ["Mon", "Tues", "Wed", "Thurs", "Fri", "Sun"],
       datasets: [
@@ -101,110 +117,24 @@ export const Home = (props: IHomeProps) => {
       // legend: ["Your spending"], // optional
     },
   ];
+  const [dataShown, setDataShown] = useState(graphList[0]);
 
-  const [dataShown, setDataShown] = useState(data[0]);
+  const {data} = useDefaultQuery()
+  console.log(data)
 
-  const transac_list: TransactionProps[] = [
-    {
+  for (let i = 0; i < 10; i++) {
+    record_list.push({
       source: MoneySource.Card,
-      transac_type: TransacType.Income,
-      category: TransacCategory.Food,
+      transac_type: TransacType.Expense,
+      category: TransacCategory.Party,
       description: "This is for testing",
-      title: "Buy me food",
+      title: "Buy me foossssssssssd",
       money: 102101,
       time: "10:09 AM",
-    },
-    {
-      source: MoneySource.Card,
+      index: i,
+    });
+  }
 
-      transac_type: TransacType.Income,
-      category: TransacCategory.Food,
-      description: "This is for testing",
-      title: "Buy me food",
-      money: 102101,
-      time: "10:09 AM",
-    },
-    {
-      source: MoneySource.Card,
-
-      transac_type: TransacType.Income,
-      category: TransacCategory.Food,
-      description: "This is for testing",
-      title: "Buy me food",
-      money: 102101,
-      time: "10:09 AM",
-    },
-    {
-      source: MoneySource.Card,
-
-      transac_type: TransacType.Income,
-      category: TransacCategory.Food,
-      description: "This is for testing",
-      title: "Buy me food",
-      money: 102101,
-      time: "10:09 AM",
-    },
-    {
-      source: MoneySource.Borrow,
-
-      transac_type: TransacType.Income,
-      category: TransacCategory.Food,
-      description: "This is for testing",
-      title: "Buy me food",
-      money: 102101,
-      time: "10:09 AM",
-    },
-    {
-      source: MoneySource.Card,
-
-      transac_type: TransacType.Income,
-      category: TransacCategory.Food,
-      description: "This is for testing",
-      title: "Buy me food",
-      money: 102101,
-      time: "10:09 AM",
-    },
-    {
-      source: MoneySource.Card,
-
-      transac_type: TransacType.Income,
-      category: TransacCategory.Food,
-      description: "This is for testing",
-      title: "Buy me food",
-      money: 102101,
-      time: "10:09 AM",
-    },
-    {
-      source: MoneySource.Card,
-
-      transac_type: TransacType.Income,
-      category: TransacCategory.Food,
-      description: "This is for testing",
-      title: "Buy me food",
-      money: 102101,
-      time: "10:09 AM",
-    },
-    {
-      source: MoneySource.Card,
-
-      transac_type: TransacType.Income,
-      category: TransacCategory.Food,
-      description: "This is for testing",
-      title: "Buy me food",
-      money: 102101,
-      time: "10:09 AM",
-    },
-    {
-      source: MoneySource.Cash,
-
-      transac_type: TransacType.Income,
-      category: TransacCategory.Food,
-      description: "This is for testing",
-      title: "Buy me food",
-      money: 102101,
-      time: "10:09 AM",
-    },
-  ];
   const chartConfig = {
     backgroundColor: Colors.WHITE,
     backgroundGradientFrom: Colors.WHITE,
@@ -222,26 +152,46 @@ export const Home = (props: IHomeProps) => {
       stroke: Colors.BUTTON,
     },
   };
-  const userImg = require("../../../assets/user_img.png");
-  const [balance, setBalance] = useState("3.000.000");
-  const [showBalance, setShowBalance] = useState(false);
-  const viewOptions = ["Today", "Week", "Month", "Year"];
-  const [selectedTab, setSelectedTab] = useState(viewOptions[0]);
-  const [transacList, setTransacList] = useState(transac_list);
 
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+
+  // animated
+  const opacity = useSharedValue(0);
+  const scale = useSharedValue(0);
+  const reanimatedStyle = useAnimatedStyle(() => {
+    return {
+      opacity: opacity.value,
+      transform: [{ scale: scale.value }],
+    };
+  }, []);
+  useEffect(() => {
+    opacity.value = 0;
+    scale.value = 0;
+    opacity.value = withTiming(1, { duration: 500 });
+    scale.value = withSpring(1, { duration: 400 });
+  }, [selectedTab]);
 
   return (
     <SafeAreaView style={styles.container}>
       <Header
         left={
           <View style={[styles.center]}>
-            <Text style={[gStyles.title1, { color: Colors.WARN }]}>
+            <Text
+              style={[
+                gStyles.title1,
+                { color: Colors.WARN, fontWeight: "800" },
+              ]}
+            >
               Welcome,{" "}
             </Text>
-            <Text style={[gStyles.title1, { color: Colors.TEXT_BOLD }]}>
-              User name !
+            <Text
+              style={[
+                gStyles.title1,
+                { color: Colors.TEXT_BOLD, fontWeight: "700" },
+              ]}
+            >
+              Quoc Phong!
             </Text>
           </View>
         }
@@ -252,11 +202,13 @@ export const Home = (props: IHomeProps) => {
               aspectRatio: 1,
               borderRadius: 50,
               overflow: "hidden",
+              shadowColor: Colors.LIGHT_GRAY,
+              elevation: 1,
             }}
           >
             <ImageBackground
               source={userImg}
-              resizeMode="contain"
+              resizeMode="cover"
               style={{ flex: 1, width: "100%" }}
             />
           </View>
@@ -266,10 +218,20 @@ export const Home = (props: IHomeProps) => {
       <View style={styles.body}>
         {/* ========= */}
         <View style={[styles.center, { flexDirection: "column" }]}>
-          <Text style={[gStyles.regular2, { color: Colors.LIGHT_GRAY }]}>
+          <Text
+            style={[
+              gStyles.regular2,
+              { fontSize: 17, color: Colors.LIGHT_GRAY, fontWeight: "400" },
+            ]}
+          >
             Account Balance
           </Text>
-          <View style={[styles.center, { gap: 10 }]}>
+          <Pressable
+            onPress={() => {
+              setShowBalance(!showBalance);
+            }}
+            style={[styles.center, { gap: 10 }]}
+          >
             <Text
               style={[
                 gStyles.title1,
@@ -279,38 +241,35 @@ export const Home = (props: IHomeProps) => {
               {showBalance ? `${balance} đ` : "*********"}
             </Text>
             {showBalance ? (
-              <EyeShow
-                fill={Colors.TEXT_BOLD}
-                onPress={() => {
-                  setShowBalance(false);
-                }}
-              />
+              <EyeShow fill={Colors.TEXT_BOLD} />
             ) : (
-              <EyeSlash
-                fill={Colors.TEXT_BOLD}
-                onPress={() => {
-                  setShowBalance(true);
-                }}
-              />
+              <EyeSlash fill={Colors.TEXT_BOLD} />
             )}
-          </View>
+          </Pressable>
         </View>
         {/* ========= */}
-        <View style={{ paddingVertical: 10 }}>
-          <Text style={[gStyles.title2, { alignSelf: "flex-start" }]}>
+        <View style={{ paddingVertical: 5 }}>
+          <Text
+            style={[
+              gStyles.title2,
+              { fontSize: 18, alignSelf: "flex-start", fontWeight: "700" },
+            ]}
+          >
             Spend Recording:{" "}
           </Text>
-          <View style={{ marginTop: 24, width: "100%" }}>
+          <Animated.View
+            style={[{ marginTop: 18, width: "100%" }, reanimatedStyle]}
+          >
             <LineChart
-              width={Dimensions.get("window").width - 20}
+              width={Dimensions.get("window").width - 52}
               data={dataShown}
               height={220}
               chartConfig={chartConfig}
               bezier
             />
-          </View>
+          </Animated.View>
         </View>
-        <View style={{ width: "100%", marginBottom: 12 }}>
+        <View style={{ width: "100%", marginVertical: 12 }}>
           <FlatList
             style={{
               backgroundColor: Colors.TEXT_LIGHT,
@@ -325,19 +284,19 @@ export const Home = (props: IHomeProps) => {
               <Pressable
                 onPress={() => {
                   setSelectedTab(item);
-                  setDataShown(data[index]);
+                  setDataShown(graphList[index]);
                 }}
                 style={[
                   styles.tabStyle,
                   {
                     backgroundColor:
                       selectedTab === item ? Colors.PRIMARY : Colors.WHITE,
-                    borderTopLeftRadius: index == 0 ? 12 : 0,
-                    borderBottomLeftRadius: index == 0 ? 12 : 0,
+                    borderTopLeftRadius: index == 0 ? 10 : 0,
+                    borderBottomLeftRadius: index == 0 ? 10 : 0,
                     borderTopRightRadius:
-                      index == viewOptions.length - 1 ? 12 : 0,
+                      index == viewOptions.length - 1 ? 10 : 0,
                     borderBottomRightRadius:
-                      index == viewOptions.length - 1 ? 12 : 0,
+                      index == viewOptions.length - 1 ? 10 : 0,
                   },
                 ]}
               >
@@ -347,6 +306,7 @@ export const Home = (props: IHomeProps) => {
                     {
                       color:
                         selectedTab === item ? Colors.WHITE : Colors.TEXT_BOLD,
+                      fontWeight: "700",
                     },
                   ]}
                 >
@@ -362,31 +322,63 @@ export const Home = (props: IHomeProps) => {
             {
               width: "100%",
               justifyContent: "space-between",
-              marginTop: 12,
               marginBottom: 8,
             },
           ]}
         >
-          <Text style={[gStyles.title2]}>Highest Transactions: </Text>
-          <Search fill={Colors.TEXT_BOLD} />
+          <Text style={[gStyles.title2, { fontSize: 18, fontWeight: "700" }]}>
+            Highest Transactions:{" "}
+          </Text>
+          <View
+            style={{
+              backgroundColor: Colors.TEXT_LIGHT,
+              padding: 8,
+              borderRadius: 50,
+              elevation: 1,
+            }}
+          >
+            <Search fill={Colors.TEXT_BOLD} />
+          </View>
         </View>
-        <FlatList
-          style={{ height: Dimensions.get("screen").height / 3.8 }}
-          contentContainerStyle={{ rowGap: 10 }}
-          data={transacList}
-          renderItem={({ item, index }) => (
-            <TransactionItem
-              source={item.source}
-              transac_type={item.transac_type}
-              description={item.description}
-              title={item.title}
-              money={item.money}
-              time={item.time}
-              category={item.category}
-            />
-          )}
-          // keyExtractor={item => item.time}
-        />
+        {isLoading ? (
+          <MotiScrollView
+            contentContainerStyle={{ gap: 10 }}
+            transition={{ type: "timing" }}
+            from={{ opacity: 0, scale: 0.1 }}
+            animate={{ opacity: 1, scale: 1 }}
+          >
+            {[...Array(4).keys()].map((i) => (
+              <Skeleton
+                colorMode={"light"}
+                width={"100%"}
+                height={70}
+                radius={12}
+                key={i}
+              />
+            ))}
+          </MotiScrollView>
+        ) : (
+          <FlatList
+            style={{
+              height: Dimensions.get("screen").height / 3.8,
+              paddingBottom: 10,
+            }}
+            contentContainerStyle={{ rowGap: 10 }}
+            data={recordList}
+            renderItem={({ item }) => (
+              <TransactionItem
+                source={item.source}
+                transac_type={item.transac_type}
+                description={item.description}
+                title={item.title}
+                money={item.money}
+                time={item.time}
+                category={item.category}
+                index={item.index}
+              />
+            )}
+          />
+        )}
       </View>
     </SafeAreaView>
   );
@@ -424,20 +416,3 @@ const styles = StyleSheet.create({
     fontSize: 15,
   },
 });
-
-// <StatusBar style="auto" />
-//       {isLoading ? (
-//         <HStack space={2} justifyContent="center">
-//           <Spinner accessibilityLabel="Loading posts" />
-//           <Heading color="primary.500" fontSize="md">
-//             {i18n.t(LocalizationKey.LOADING)}
-//           </Heading>
-//         </HStack>
-//       ) : (
-//         <>
-//           <Text>{i18n.t(LocalizationKey.HOME)}</Text>
-//           <Heading color="primary.500" fontSize="md">
-//             {data?.username}
-//           </Heading>
-//         </>
-//       )}

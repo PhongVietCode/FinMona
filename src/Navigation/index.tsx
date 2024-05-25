@@ -31,7 +31,7 @@ const ApplicationNavigator = () => {
     <NavigationContainer>
       <StatusBar />
       <RootStack.Navigator screenOptions={{ headerShown: false }}>
-        <RootStack.Screen
+        <RootStack.Screen 
           name={RootScreens.ONBOARD}
           component={OnboardContainer}
         />

@@ -8,104 +8,15 @@ import { FlatList, Text, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import GraphIcon from "../../../assets/icons/graph-increase.svg";
 export const Notify: FunctionComponent = () => {
-  const data = [
-    {
+  const data = [];
+  for (let i = 0; i < 30; i++) {
+    data.push({
       icon: <GraphIcon fill={Colors.TEXT_BOLD} />,
       label: "On no, Over Budget !",
       desc: "You have spend all the money this month",
       time: "10:09 AM",
-    },
-    {
-      icon: <GraphIcon fill={Colors.TEXT_BOLD} />,
-      label: "On no, Over Budget !",
-      desc: "You have spend all the money this month",
-      time: "10:09 AM",
-    },
-    {
-      icon: <GraphIcon fill={Colors.TEXT_BOLD} />,
-      label: "On no, Over Budget !",
-      desc: "You have spend all the money this month",
-      time: "10:09 AM",
-    },
-    {
-      icon: <GraphIcon fill={Colors.TEXT_BOLD} />,
-      label: "On no, Over Budget !",
-      desc: "You have spend all the money this month",
-      time: "10:09 AM",
-    },
-    {
-      icon: <GraphIcon fill={Colors.TEXT_BOLD} />,
-      label: "On no, Over Budget !",
-      desc: "You have spend all the money this month",
-      time: "10:09 AM",
-    },
-    {
-      icon: <GraphIcon fill={Colors.TEXT_BOLD} />,
-      label: "On no, Over Budget !",
-      desc: "You have spend all the money this month",
-      time: "10:09 AM",
-    },
-    {
-      icon: <GraphIcon fill={Colors.TEXT_BOLD} />,
-      label: "On no, Over Budget !",
-      desc: "You have spend all the money this month",
-      time: "10:09 AM",
-    },
-    {
-      icon: <GraphIcon fill={Colors.TEXT_BOLD} />,
-      label: "On no, Over Budget !",
-      desc: "You have spend all the money this month",
-      time: "10:09 AM",
-    },
-    {
-      icon: <GraphIcon fill={Colors.TEXT_BOLD} />,
-      label: "On no, Over Budget !",
-      desc: "You have spend all the money this month",
-      time: "10:09 AM",
-    },
-    {
-      icon: <GraphIcon fill={Colors.TEXT_BOLD} />,
-      label: "On no, Over Budget !",
-      desc: "You have spend all the money this month",
-      time: "10:09 AM",
-    },
-    {
-      icon: <GraphIcon fill={Colors.TEXT_BOLD} />,
-      label: "On no, Over Budget !",
-      desc: "You have spend all the money this month",
-      time: "10:09 AM",
-    },
-    {
-      icon: <GraphIcon fill={Colors.TEXT_BOLD} />,
-      label: "On no, Over Budget !",
-      desc: "You have spend all the money this month",
-      time: "10:09 AM",
-    },
-    {
-      icon: <GraphIcon fill={Colors.TEXT_BOLD} />,
-      label: "On no, Over Budget !",
-      desc: "You have spend all the money this month",
-      time: "10:09 AM",
-    },
-    {
-      icon: <GraphIcon fill={Colors.TEXT_BOLD} />,
-      label: "On no, Over Budget !",
-      desc: "You have spend all the money this month",
-      time: "10:09 AM",
-    },
-    {
-      icon: <GraphIcon fill={Colors.TEXT_BOLD} />,
-      label: "On no, Over Budget !",
-      desc: "You have spend all the money this month",
-      time: "10:09 AM",
-    },
-    {
-      icon: <GraphIcon fill={Colors.TEXT_BOLD} />,
-      label: "On no, Over Budget !",
-      desc: "You have spend all the money this month ",
-      time: "10:09 AM",
-    },
-  ];
+    });
+  }
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.BACKGROUND }}>
       <Header
@@ -114,10 +25,11 @@ export const Notify: FunctionComponent = () => {
         center={<Text style={gStyles.title1}>Notification</Text>}
       />
       <FlatList
-      contentContainerStyle={{
-        paddingHorizontal: 16,
-        gap: 10
-      }}
+        contentContainerStyle={{
+          paddingHorizontal: 16,
+          paddingBottom:20,
+          gap: 10,
+        }}
         data={data}
         renderItem={({ item }) => (
           <NotificationItem
