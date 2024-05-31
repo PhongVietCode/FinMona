@@ -12,7 +12,7 @@ import {
   PURGE,
   REGISTER,
 } from "redux-persist";
-import { homeReducers, themeReducers } from "./reducers";
+import { editRecordReducer, homeReducers, themeReducers,userReducer,budgetReducer, notifiReducer } from "./reducers";
 
 const reducers = combineReducers({
   [API.reducerPath]: API.reducer,
@@ -20,6 +20,10 @@ const reducers = combineReducers({
   home: homeReducers,
   [TAG_API.reducerPath]: TAG_API.reducer,
   [RECORD_API.reducerPath]: RECORD_API.reducer,
+  user: userReducer,
+  editRecord: editRecordReducer,
+  budget: budgetReducer, 
+  notify: notifiReducer
 });
 
 const persistConfig = {
@@ -38,12 +42,6 @@ const store = configureStore({
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
       },
     }).concat([API.middleware, TAG_API.middleware, RECORD_API.middleware]);
-
-    // if (__DEV__ && !process.env.JEST_WORKER_ID) {
-    //   const createDebugger = require("redux-flipper").default;
-    //   middlewares.push(createDebugger());
-    // }
-
     return middlewares;
   },
 });
@@ -51,5 +49,8 @@ const store = configureStore({
 const persistor = persistStore(store);
 
 setupListeners(store.dispatch);
-
+// Infer the `RootState` and `AppDispatch` types from the store itself
+export type RootState = ReturnType<typeof store.getState>
+// Inferred type: {posts: PostsState, comments: CommentsState, users: UsersState}
+export type AppDispatch = typeof store.dispatch
 export { store, persistor };

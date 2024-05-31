@@ -20,6 +20,8 @@ export const SettingItem = (props: SettingItemProps) => {
         alignItems: "center",
         paddingVertical: 8,
         paddingHorizontal: 12,
+        flex: 1,
+        gap: 10
       }}
       onPress={props.onPress}
     >
@@ -33,19 +35,19 @@ export const SettingItem = (props: SettingItemProps) => {
         >
           {props.icon}
         </View>
-        <View style={{ flexDirection: "column", gap: 5 }}>
-          <Text style={[gStyles.title3, { fontSize: 16 }]}>{props.label}</Text>
-          <Text
-            style={[
-              gStyles.title3,
-              { fontWeight: "500", color: Colors.LIGHT_GRAY },
-            ]}
-          >
-            {props.label}
-          </Text>
-        </View>
       </View>
-      {props.rightIcon}
+      <View style={{ flexDirection: "column", gap: 5, flexShrink: 1 }}>
+        <Text style={[gStyles.title3, { fontSize: 16 }]}>{props.label}</Text>
+        <Text
+          style={[
+            gStyles.title3,
+            { fontWeight: "500", color: Colors.LIGHT_GRAY, flexWrap: "wrap" },
+          ]}
+        >
+          {props.des}
+        </Text>
+      </View>
+      <View>{props.rightIcon}</View>
     </Pressable>
   );
 };

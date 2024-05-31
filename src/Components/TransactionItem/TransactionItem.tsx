@@ -9,18 +9,18 @@ import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/Navigation";
 import { RootScreens } from "@/Screens";
+import { useDispatch } from "react-redux";
+import { setEditRecord } from "@/Store/reducers";
 
 export interface Transaction {
   id: string;
   isIncome: boolean;
-  repeat: boolean;
   amount: number;
   category: string;
   moneySource: string;
   dateCreated: string;
   user: string;
   description: string;
-  dateRepeat: string;
 }
 
 export const transactionStyle = (type: string) => {
@@ -48,7 +48,7 @@ export const transactionStyle = (type: string) => {
       };
   }
 };
-export const moneyConvert = (money: number) => {
+export const moneyConvert = (money: Number) => {
   const strMoney = money.toString();
   let res = "";
   let count = 0;
@@ -62,16 +62,20 @@ export const moneyConvert = (money: number) => {
     count++;
     index--;
   }
-  return res;
+  return res+' VND';
 };
 export const TransactionItem = (props: Transaction) => {
   const itemStyle = transactionStyle(props.category.split("_")[1]);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const dispatch = useDispatch();
   return (
     <Pressable
       style={styles.container}
-      onPress={() => navigation.navigate(RootScreens.DETAIL, props)}
+      onPress={() => {
+        dispatch(setEditRecord(props));
+        navigation.navigate(RootScreens.DETAIL);
+      }}
     >
       <View
         style={{
@@ -89,8 +93,19 @@ export const TransactionItem = (props: Transaction) => {
         >
           {itemStyle?.icon}
         </View>
-        <View style={{ display: "flex", justifyContent: "space-between" }}>
-          <Text style={gStyles.title3}>{props.description}</Text>
+        <View
+          style={{
+            flex: 1,
+            marginRight: 2,
+          }}
+        >
+          <Text
+            style={[gStyles.title3, { flexWrap: "wrap" }]}
+            ellipsizeMode="tail"
+            numberOfLines={1}
+          >
+            {props.description}
+          </Text>
           <Text
             style={{ fontSize: FontSize.SMALL - 1, color: Colors.LIGHT_GRAY }}
           >
@@ -98,7 +113,13 @@ export const TransactionItem = (props: Transaction) => {
           </Text>
         </View>
       </View>
-      <View style={{ display: "flex", justifyContent: "space-between", alignItems:'flex-end' }}>
+      <View
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-end",
+        }}
+      >
         <Text
           style={{
             color: props.isIncome ? Colors.GREEN_80 : Colors.WARN,
@@ -107,7 +128,7 @@ export const TransactionItem = (props: Transaction) => {
           }}
         >
           {props.isIncome ? "+ " : "- "}
-          {moneyConvert(props.amount)}đ
+          {moneyConvert(props.amount)}
         </Text>
         <Text style={{ textAlign: "right", color: Colors.LIGHT_GRAY }}>
           {props.dateCreated}

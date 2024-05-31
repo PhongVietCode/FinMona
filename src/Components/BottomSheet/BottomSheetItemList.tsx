@@ -1,7 +1,7 @@
 import { gStyles } from "@/Theme";
 import { Colors, FontSize } from "@/Theme/Variables";
 import { ScrollView } from "native-base";
-import { ReactNode, useRef, useState } from "react";
+import { ReactNode, useEffect, useRef, useState } from "react";
 import { Pressable, Text } from "react-native";
 import { StyleSheet, View } from "react-native";
 import { BottomSheet } from "react-native-btr";
@@ -14,17 +14,43 @@ import { RootStackParamList } from "@/Navigation";
 import AddIcon from "../../../assets/icons/circle-plus.svg";
 import { RootScreens } from "@/Screens";
 import { Tag } from "@/Services";
+import EmptyIcon from "../../../assets/icons/empty.svg";
+
 export interface BottomSheetProps {
   show: any;
   setShow: any;
   list?: Tag[];
   label: string;
   onPress: (item: Tag) => void;
+  editItemChoosen?: string;
 }
 export const BottomSheetItemList = (props: BottomSheetProps) => {
-  const [choosenItem, setChoosenItem] = useState<Tag>();
+  let tagChoosen: Tag = {
+    id: "",
+    icon: "",
+    title: "",
+    type: "",
+  };
+  const [choosenItem, setChoosenItem] = useState<Tag>(tagChoosen);
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  useEffect(() => {
+    if (props.editItemChoosen) {
+      tagChoosen =
+        props.list?.filter((item) => item.title == props.editItemChoosen)[0] ||
+        tagChoosen;
+      console.log(tagChoosen);
+    }
+    setChoosenItem(tagChoosen);
+  }, [props.list]);
   return (
-    <BottomSheet visible={props.show} onBackdropPress={props.setShow}>
+    <BottomSheet
+      visible={props.show}
+      onBackdropPress={() => {
+        props.setShow();
+        props.onPress(choosenItem!);
+      }}
+    >
       <View
         style={{
           flex: 0.5,
@@ -54,28 +80,52 @@ export const BottomSheetItemList = (props: BottomSheetProps) => {
             <Text style={[gStyles.title2, { fontSize: 24 }]}>
               {props.label}
             </Text>
+            <Pressable
+              onPress={() => {
+                props.setShow();
+                props.onPress(choosenItem!);
+                navigation.navigate(RootScreens.TAG);
+              }}
+            >
+              <Text style={{fontSize: 16, backgroundColor: Colors.STROKE, padding: 8}}>Create New</Text>
+            </Pressable>
           </View>
-          <ScrollView
-            style={{ height: 400 }}
-            contentContainerStyle={{
-              display: "flex",
-              flexDirection: "row",
-              flexWrap: "wrap",
-              width: "100%",
-              gap: 8,
-              justifyContent: "space-around",
-            }}
-          >
-            {props.list?.map((item: Tag, index) => (
-              <TransacItem
-                onPress={() => setChoosenItem(item)}
-                isChoosen={choosenItem == item}
-                // icon={item.icon}
-                label={item.title}
-                key={index}
-              />
-            ))}
-          </ScrollView>
+          {props.list?.length == 0 ? (
+            <View style={{ alignItems: "center" }}>
+              <EmptyIcon stroke={Colors.LIGHT_GRAY} width={100} height={100} />
+              <Text
+                style={{
+                  color: Colors.LIGHT_GRAY,
+                  fontWeight: "500",
+                  fontSize: 17,
+                }}
+              >
+                You don't have any item
+              </Text>
+            </View>
+          ) : (
+            <ScrollView
+              style={{ height: 400 }}
+              contentContainerStyle={{
+                display: "flex",
+                flexDirection: "row",
+                flexWrap: "wrap",
+                width: "100%",
+                gap: 8,
+                justifyContent: "flex-start",
+              }}
+            >
+              {props.list?.map((item: Tag, index) => (
+                <TransacItem
+                  onPress={() => setChoosenItem(item)}
+                  isChoosen={choosenItem.id == item.id}
+                  // icon={item.icon}
+                  label={item.title}
+                  key={index}
+                />
+              ))}
+            </ScrollView>
+          )}
         </View>
         <BigButton
           text={"Done"}

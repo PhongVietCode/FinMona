@@ -1,4 +1,3 @@
-import { i18n, LocalizationKey } from "@/Localization";
 import React, { useEffect, useState } from "react";
 import {
   View,
@@ -8,11 +7,10 @@ import {
   Dimensions,
   FlatList,
   Pressable,
+  ScrollView,
 } from "react-native";
-import { useLazyGetUserQuery, User } from "@/Services";
-import ArrowDown from "../../../assets/icons/arrow-down-circle.svg";
 import ArrowUp from "../../../assets/icons/arrow-up-circle.svg";
-
+import * as Sentry from '@sentry/react-native';
 import EyeShow from "../../../assets/icons/eye-alt.svg";
 import Search from "../../../assets/icons/search-alt.svg";
 import { Colors, FontSize } from "@/Theme/Variables";
@@ -21,12 +19,13 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { gStyles } from "@/Theme";
 import { LineChart } from "react-native-chart-kit";
 import EyeSlash from "../../../assets/icons/eye-slash.svg";
-import { MotiScrollView, MotiView } from "moti";
+import { MotiScrollView } from "moti";
 import { Skeleton } from "moti/skeleton";
 
 import {
   TransactionItem,
   Transaction,
+  moneyConvert,
 } from "@/Components/TransactionItem/TransactionItem";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
@@ -37,6 +36,16 @@ import Animated, {
   withTiming,
   withSpring,
 } from "react-native-reanimated";
+import { useSelector } from "react-redux";
+import { RootState } from "@/Store";
+import {
+  useLazyGetAllRecordsQuery,
+  useLazyGetRecordByDateQuery,
+  useLazyGetRecordByTimeRangeQuery,
+} from "@/Services";
+import LottieView from "lottie-react-native";
+import LoadIcon from "../../../assets/icons/load.svg";
+import EmptyIcon from "../../../assets/icons/empty.svg";
 
 export interface HomeProps {
   data: Transaction[] | undefined;
@@ -44,34 +53,70 @@ export interface HomeProps {
   isFetching: boolean;
 }
 export const Home = (props: HomeProps) => {
-  // const [isLoading, setIsLoading] = useState(false);
-
+  const [listRecord, setListRecord] = useState<Transaction[]>([]);
+  const [fetchRecords] = useLazyGetAllRecordsQuery();
   const userImg = require("../../../assets/my_img.jpg");
   const [balance, setBalance] = useState("3.000.000");
+  const calculateBalance = () => {
+    let total = 0;
+    props.data?.map((item) => {
+      if (item.isIncome == true) {
+        total += item.amount;
+      }
+    });
+    setBalance(moneyConvert(total));
+  };
   const [showBalance, setShowBalance] = useState(false);
-  const viewOptions = ["Today", "Week", "Month", "Year"];
+  const viewOptions = ["Day", "Week", "Month", "Year"];
   const [selectedTab, setSelectedTab] = useState(viewOptions[0]);
-  const record_list: Transaction[] = [];
+  const [fetchRecordByTimeRange] = useLazyGetRecordByTimeRangeQuery();
+  const [fetchRecordByDate] = useLazyGetRecordByDateQuery();
 
-  const [recordList, setRecordList] = useState(record_list);
-  const graphList = [
+  const [loadGraph, setLoadGraph] = useState(false);
+  const date = new Date(Date.now());
+  // const [recordList, setRecordList] = useState(record_list);
+
+  const [graphData, setGraphList] = useState({
+    day: [0, 0, 0, 0, 0, 0, 0],
+    week: [0, 0, 0, 0],
+    month: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+    year: [0, 0, 0, 0],
+  });
+  const daysInMonth = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  const dateInWeek = date.getUTCDay();
+  const month = date.getMonth() + 1;
+  let startMonth = month;
+  let endMonth = month;
+  const today = date.getDate();
+  let startOfWeek = today - dateInWeek + 1 - 1;
+  let endOfWeek = today + (7 - dateInWeek) + 1;
+  if (startOfWeek <= 0) {
+    startOfWeek = daysInMonth[month] + startOfWeek;
+    startMonth -= 1;
+  }
+  if (endOfWeek > daysInMonth[month]) {
+    endOfWeek = endOfWeek - daysInMonth[month];
+    endMonth += 1;
+  }
+  const initialGraphData = [
     {
-      labels: ["Mon", "Tues", "Wed", "Thurs", "Fri", "Sun"],
+      labels: ["Mon", "Tues", "Wed", "Thurs", "Fri", "Sat", "Sun"],
       datasets: [
         {
-          data: [20, 45, 28, 80, 49, 170],
+          data: graphData.day,
           color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
           strokeWidth: 5, // optional
           strokeColor: Colors.PRIMARY,
         },
       ],
+
       // legend: ["Your spending"], // optional
     },
     {
       labels: ["First", "Second", "Third", "Fourth"],
       datasets: [
         {
-          data: [12, 41, 59, 80],
+          data: graphData.week,
           color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
           strokeWidth: 5, // optional
           strokeColor: Colors.PRIMARY,
@@ -96,7 +141,7 @@ export const Home = (props: HomeProps) => {
       ],
       datasets: [
         {
-          data: [20, 45, 28, 80, 49, 170, 20, 45, 28, 80, 49, 170, 12, 213],
+          data: graphData.month,
           color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
           strokeWidth: 5, // optional
           strokeColor: Colors.PRIMARY,
@@ -108,7 +153,7 @@ export const Home = (props: HomeProps) => {
       labels: ["2021", "2022", "2023", "2024"],
       datasets: [
         {
-          data: [3124, 4125, 5125, 9823],
+          data: graphData.year,
           color: (opacity = 1) => `rgba(134, 65, 244, ${opacity})`, // optional
           strokeWidth: 5, // optional
           strokeColor: Colors.PRIMARY,
@@ -117,7 +162,82 @@ export const Home = (props: HomeProps) => {
       // legend: ["Your spending"], // optional
     },
   ];
-  const [dataShown, setDataShown] = useState(graphList[0]);
+
+  const refreshData = async () => {
+    if (selectedTab == viewOptions[0]) {
+      await getTotalAmountByDay();
+    } else if (selectedTab == viewOptions[1]) {
+      await getTotalAmountByWeek();
+    }
+    calculateBalance();
+  };
+  const getTotalAmountByDay = async () => {
+    let data = [0, 0, 0, 0, 0, 0, 0];
+    setLoadGraph(true);
+
+    await fetchRecordByTimeRange({
+      id: user.id,
+      startDate: `${startOfWeek}-${startMonth}-${date.getFullYear()}`,
+      endDate: `${endOfWeek}-${endMonth}-${date.getFullYear()}`,
+    })
+      .unwrap()
+      .then((fullfilled: Transaction[]) => {
+        let date = startOfWeek + 1;
+        for (let i = 0; i < 7; i++) {
+          if (date > daysInMonth[month]) {
+            date = 1;
+          }
+          data[i] = fullfilled.filter(
+            (item) =>
+              item.dateCreated.split("-")[0] ==
+              (date < 10 ? `0${date}` : `${date}`)
+          ).length;
+          date++;
+        }
+        setGraphList({ ...graphData, day: data });
+        setListRecord(fullfilled);
+      })
+      .catch((rejected: any) => {
+        Sentry.captureException(rejected)
+      });
+    setLoadGraph(false);
+  };
+  const getTotalAmountByWeek = async () => {
+    let data = [0, 0, 0, 0];
+    setLoadGraph(true);
+    await fetchRecordByTimeRange({
+      id: user.id,
+      startDate: `01-${month}-${date.getFullYear()}`,
+      endDate: `${31}-${month}-${date.getFullYear()}`,
+    })
+      .unwrap()
+      .then((fullfilled: Transaction[]) => {
+        let date = 1;
+        let upperBound = date + 6;
+        for (let i = 0; i < data.length; i++) {
+          data[i] = fullfilled.filter(
+            (item) =>
+              Number(item.dateCreated.split("-")[0]) >= date &&
+              Number(item.dateCreated.split("-")[0]) <= upperBound
+          ).length;
+          date += 7;
+          upperBound = date + 6;
+          if (date >= 21) {
+            upperBound = daysInMonth[month];
+          }
+        }
+        setGraphList({ ...graphData, week: data });
+        setListRecord(fullfilled);
+      })
+      .catch((rejected) => {});
+    setLoadGraph(false);
+  };
+  const getTotalAmountByMonth = () => {};
+  const getTotalAmountByYear = () => {};
+
+  useEffect(() => {}, [selectedTab]);
+
+  const [dataShown, setDataShown] = useState(initialGraphData[0]);
 
   const chartConfig = {
     backgroundColor: Colors.WHITE,
@@ -151,10 +271,15 @@ export const Home = (props: HomeProps) => {
     };
   }, []);
   useEffect(() => {
+    getTotalAmountByDay();
+    calculateBalance();
+  }, []);
+  useEffect(() => {
     opacity.value = 0;
     scale.value = 0;
     opacity.value = withTiming(1, { duration: 500 });
     scale.value = withSpring(1, { duration: 400 });
+    refreshData();
   }, [selectedTab]);
 
   const rotate = useSharedValue(0);
@@ -179,11 +304,21 @@ export const Home = (props: HomeProps) => {
     }
   }, [expanded]);
 
+  useEffect(() => {
+    refreshData();
+  }, [props.data]);
+
+  const user = useSelector((state: RootState) => state.user);
   return (
     <SafeAreaView style={styles.container}>
       <Header
         left={
-          <View style={[styles.center]}>
+          <View
+            style={[
+              styles.center,
+              { flexDirection: "column", alignItems: "flex-start", flex: 1 },
+            ]}
+          >
             <Text
               style={[
                 gStyles.title1,
@@ -197,8 +332,10 @@ export const Home = (props: HomeProps) => {
                 gStyles.title1,
                 { color: Colors.TEXT_BOLD, fontWeight: "700" },
               ]}
+              numberOfLines={1}
+              ellipsizeMode="tail"
             >
-              User name
+              {user.name}
             </Text>
           </View>
         }
@@ -214,15 +351,17 @@ export const Home = (props: HomeProps) => {
             }}
           >
             <ImageBackground
-              source={userImg}
+              source={{
+                uri: "https://images.unsplash.com/photo-1716319487101-108ceed67fcb?q=80&w=2187&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+              }}
               resizeMode="cover"
-              style={{ flex: 1, width: "100%" }}
+              style={{ flex: 1, width: "100%", transform: [{ scale: 1.2 }] }}
             />
           </View>
         }
         center={null}
       />
-      <View style={styles.body}>
+      <ScrollView style={styles.body}>
         {/* ========= */}
         <View style={[styles.center, { flexDirection: "column" }]}>
           <Text
@@ -245,7 +384,7 @@ export const Home = (props: HomeProps) => {
                 { fontWeight: "600", fontSize: FontSize.HUGE },
               ]}
             >
-              {showBalance ? `${balance} đ` : "*********"}
+              {showBalance ? `${balance}` : "*********"}
             </Text>
             {showBalance ? (
               <EyeShow fill={Colors.TEXT_BOLD} />
@@ -285,13 +424,26 @@ export const Home = (props: HomeProps) => {
                 expandedStyle,
               ]}
             >
-              <LineChart
-                width={Dimensions.get("window").width - 52}
-                data={dataShown}
-                height={200}
-                chartConfig={chartConfig}
-                bezier
-              />
+              {loadGraph && props.isFetching ? (
+                <LottieView
+                  autoPlay
+                  style={{
+                    height: 200,
+                    alignSelf: "center",
+                    backgroundColor: Colors.TRANSPARENT,
+                  }}
+                  // Find more Lottie files at https://lottiefiles.com/featured
+                  source={require("../../../assets/anim/loading_anim2.json")}
+                />
+              ) : (
+                <LineChart
+                  width={Dimensions.get("window").width - 52}
+                  data={dataShown}
+                  height={200}
+                  chartConfig={chartConfig}
+                  bezier
+                />
+              )}
             </Animated.View>
           ) : (
             <></>
@@ -311,8 +463,8 @@ export const Home = (props: HomeProps) => {
             renderItem={({ item, index }) => (
               <Pressable
                 onPress={() => {
+                  setDataShown(initialGraphData[index]);
                   setSelectedTab(item);
-                  setDataShown(graphList[index]);
                 }}
                 style={[
                   styles.tabStyle,
@@ -356,20 +508,17 @@ export const Home = (props: HomeProps) => {
           ]}
         >
           <Text style={[gStyles.title2, { fontSize: 18, fontWeight: "700" }]}>
-            Highest Transactions:{" "}
+            Transactions:{" "}
           </Text>
-          <View
-            style={{
-              backgroundColor: Colors.TEXT_LIGHT,
-              padding: 8,
-              borderRadius: 50,
-              elevation: 1,
+          <Pressable
+            onPress={() => {
+              refreshData();
             }}
           >
-            <Search fill={Colors.TEXT_BOLD} />
-          </View>
+            <LoadIcon fill={Colors.TEXT_BOLD} width={28} height={28} />
+          </Pressable>
         </View>
-        {props.isLoading ? (
+        {loadGraph ? (
           <MotiScrollView
             contentContainerStyle={{ gap: 10 }}
             transition={{ type: "timing" }}
@@ -387,19 +536,34 @@ export const Home = (props: HomeProps) => {
             ))}
           </MotiScrollView>
         ) : (
-          <FlatList
-            style={{
-              // height: Dimensions.get("screen").height / 3.8,
-              paddingBottom: 10,
-            }}
-            contentContainerStyle={{ rowGap: 10 }}
-            data={props.data}
-            renderItem={({ item, index }) => (
-              <TransactionItem {...item} key={index} />
+          <View>
+            {listRecord.length == 0 ? (
+              <View style={{ alignItems: "center" }}>
+                <EmptyIcon
+                  stroke={Colors.LIGHT_GRAY}
+                  width={100}
+                  height={100}
+                />
+                <Text
+                  style={{
+                    color: Colors.LIGHT_GRAY,
+                    fontWeight: "600",
+                    fontSize: 17,
+                  }}
+                >
+                  No record
+                </Text>
+              </View>
+            ) : (
+              <View>
+                {listRecord.map((item, index) => (
+                  <TransactionItem {...item} key={index} />
+                ))}
+              </View>
             )}
-          />
+          </View>
         )}
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

@@ -1,3 +1,3 @@
 import App from "./src";
-
-export default App;
+import * as Sentry from "@sentry/react-native";
+export default Sentry.wrap(App);

@@ -1,13 +1,14 @@
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { RECORD_API } from "../base";
 import { Transaction } from "@/Components/TransactionItem/TransactionItem";
+import { useSelector } from "react-redux";
+import { RootState } from "@/Store";
 
-export const getTokenFromLocalStorage = () => {
-  // fake get token from local storage
-  return "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjY2NTBjMzFlYjM3NzliN2JhMGY0NDRjNyIsImlhdCI6MTcxNjU2ODg4MSwiZXhwIjoxNzE2ODI4MDgxfQ.v0EPFKuPa4AeNdiM39eOJkdoYdke7gkjvqvgrn39Rr0";
-};
-export const getIDFromLocalStorage = () => {
-  // fake get ID from local storage
-  return "6650c31eb3779b7ba0f444c7";
+export const getTokenFromLocalStorage = async () => {
+  await AsyncStorage.getItem("token").then((value: any) => {
+    return value;
+  });
+  // return user.token;
 };
 const recordApi = RECORD_API.injectEndpoints({
   endpoints: (build) => ({
@@ -41,8 +42,11 @@ const recordApi = RECORD_API.injectEndpoints({
         headers: {
           Authorization: `Bearer ${getTokenFromLocalStorage()}`,
         },
-        body: data.body,
+        body: JSON.stringify(data.body),
       }),
+      invalidatesTags: (result, error, data) => [
+        { type: "Records", id: data.id },
+      ],
     }),
     addRecord: build.mutation<
       string,
@@ -54,9 +58,11 @@ const recordApi = RECORD_API.injectEndpoints({
         headers: {
           Authorization: `Bearer ${getTokenFromLocalStorage()}`,
         },
-        body: data.body,
+        body: JSON.stringify(data.body),
       }),
-      invalidatesTags: (result, error, data) => [{type: "Records", id: "LIST"}]
+      invalidatesTags: (result, error, data) => [
+        { type: "Records", id: "LIST" },
+      ],
     }),
     deleteRecord: build.mutation<string, { idReport: string }>({
       query: (data) => ({
@@ -66,6 +72,87 @@ const recordApi = RECORD_API.injectEndpoints({
           Authorization: `Bearer ${getTokenFromLocalStorage()}`,
         },
       }),
+      invalidatesTags: (result, error, data) => [
+        { type: "Records", id: data.idReport },
+      ],
+    }),
+    getRecordByTimeRange: build.query<
+      Transaction[],
+      { id: string; startDate: string; endDate: string }
+    >({
+      query: (data) => ({
+        url: `records/${data.id}/getRecordByTime`,
+        method: "GET",
+        params: { startDate: data.startDate, endDate: data.endDate },
+      }),
+      providesTags(result) {
+        if (result) {
+          const final = [
+            ...result.map(({ id }) => ({ type: "Records" as const, id })),
+            { type: "Records" as const, id: "LIST" },
+          ];
+          return final;
+        }
+        const final = [{ type: "Records" as const, id: "LIST" }];
+        return final;
+      },
+    }),
+    getRecordByDate: build.query<Transaction[], { id: string; date: string }>({
+      query: (data) => ({
+        url: `records/${data.id}/getRecordByDate`,
+        params: { date: data.date },
+      }),
+      providesTags(result) {
+        if (result) {
+          const final = [
+            ...result.map(({ id }) => ({ type: "Records" as const, id })),
+            { type: "Records" as const, id: "LIST" },
+          ];
+          return final;
+        }
+        const final = [{ type: "Records" as const, id: "LIST" }];
+        return final;
+      },
+    }),
+    getRecordByCategory: build.query<
+      Transaction[],
+      { id: string; categoryName: string }
+    >({
+      query: (data) => ({
+        url: `records/${data.id}/getRecordByCategory`,
+        params: { categoryName: data.categoryName },
+      }),
+      providesTags(result) {
+        if (result) {
+          const final = [
+            ...result.map(({ id }) => ({ type: "Records" as const, id })),
+            { type: "Records" as const, id: "LIST" },
+          ];
+          return final;
+        }
+        const final = [{ type: "Records" as const, id: "LIST" }];
+        return final;
+      },
+    }),
+    getRecordByMoneySource: build.query<
+      Transaction[],
+      { id: string; moneySourceName: string }
+    >({
+      query: (data) => ({
+        url: `records/${data.id}/getRecordByMoneySource`,
+        params: { moneySourceName: data.moneySourceName },
+      }),
+      providesTags(result) {
+        if (result) {
+          const final = [
+            ...result.map(({ id }) => ({ type: "Records" as const, id })),
+            { type: "Records" as const, id: "LIST" },
+          ];
+          return final;
+        }
+        const final = [{ type: "Records" as const, id: "LIST" }];
+        return final;
+      },
     }),
   }),
   overrideExisting: true,
@@ -75,4 +162,8 @@ export const {
   useAddRecordMutation,
   useEditRecordMutation,
   useDeleteRecordMutation,
+  useLazyGetRecordByTimeRangeQuery,
+  useLazyGetRecordByDateQuery,
+  useLazyGetRecordByCategoryQuery,
+  useLazyGetRecordByMoneySourceQuery,
 } = recordApi;

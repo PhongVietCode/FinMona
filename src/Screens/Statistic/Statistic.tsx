@@ -1,72 +1,80 @@
 import { Header } from "@/Components/Header/Header";
 import { gStyles } from "@/Theme";
 import { Colors } from "@/Theme/Variables";
-import { FlatList, ScrollView } from "native-base";
-import React, {
-  FunctionComponent,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+
+import React, { useEffect, useState } from "react";
 import {
   Dimensions,
-  Image,
   Pressable,
   StyleSheet,
   Text,
-  TouchableWithoutFeedback,
   View,
+  FlatList,
+  ScrollView,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import ArrowDown from "../../../assets/icons/chevron-down.svg";
-import ArrowLeft from "../../../assets/icons/chevron-left.svg";
 import ArrowRight from "../../../assets/icons/chevron-right.svg";
 import { PieChart } from "react-native-chart-kit";
 import {
   TransactionItem,
   Transaction,
   transactionStyle,
+  moneyConvert,
 } from "@/Components/TransactionItem/TransactionItem";
-import Animated, {
-  Easing,
-  FadeInDown,
-  FadeOut,
-  FadeOutUp,
-  useAnimatedStyle,
-  useSharedValue,
-  withDelay,
-  withSequence,
-  withSpring,
-  withTiming,
-} from "react-native-reanimated";
 import ShoppingIcon from "../../../assets/icons/shopping-bag-14.svg";
-import Food from "../../../assets/icons/Food.svg";
+import Food from "../../../assets/icons/food_2.svg";
 import TransportIcon from "../../../assets/icons/school-bus.svg";
 import PartyIcon from "../../../assets/icons/party horn.svg";
 import { MotiScrollView, MotiView } from "moti";
 import { Skeleton } from "moti/skeleton";
-import { getIDFromLocalStorage, useLazyGetAllRecordsQuery } from "@/Services";
-
-export const Statistic = () => {
-  const [fetchRecords,{data, isLoading, isFetching}] = useLazyGetAllRecordsQuery()
-
-  
-  const listChoice = ["Chart", "List Item", "Note"];
+import {
+  Tag,
+  useLazyGetAllTagsQuery,
+  useLazyGetRecordByCategoryQuery,
+  useLazyGetRecordByMoneySourceQuery,
+  useLazyGetRecordByTimeRangeQuery,
+} from "@/Services";
+import { useSelector } from "react-redux";
+import { RootState } from "@/Store";
+import { useNavigation } from "@react-navigation/native";
+import { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { RootStackParamList } from "@/Navigation";
+import { RootScreens } from "..";
+import LottieView from "lottie-react-native";
+import { Image } from "react-native";
+import { ImageBackground } from "react-native";
+import EmptyGraph from "../../../assets/icons/graph.svg";
+import EmptyIcon from "../../../assets/icons/empty.svg";
+interface StatisticProps {
+  data: Transaction[] | [];
+}
+export const Statistic = (props: StatisticProps) => {
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const typeList = ["Category", "Money Source"];
   const listIcon = [
-    <ShoppingIcon fill={Colors.WHITE} />,
-    <Food fill={Colors.WHITE} />,
-    <TransportIcon fill={Colors.WHITE} />,
-    <PartyIcon fill={Colors.WHITE} />,
+    {
+      icon: <ShoppingIcon fill={Colors.WHITE} />,
+      color: Colors.CAUTION,
+      label: "Shopping",
+    },
+    {
+      icon: <Food fill={Colors.WHITE} />,
+      color: Colors.WARN,
+      label: "Food",
+    },
+    {
+      icon: <TransportIcon fill={Colors.WHITE} />,
+      color: Colors.GREEN_80,
+      label: "Transport",
+    },
+    {
+      icon: <PartyIcon fill={Colors.WHITE} />,
+      color: Colors.PRIMARY,
+      label: "Party",
+    },
   ];
-  const listIconColor = [
-    Colors.CAUTION,
-    Colors.WARN,
-    Colors.GREEN_80,
-    Colors.PRIMARY,
-  ];
-  const listIconLabel = ["Shopping", "Food", "Transport", "Party"];
-  const [viewChoice, setViewChoice] = useState(listChoice[0]);
   const months = [
     "Jan",
     "Feb",
@@ -81,13 +89,24 @@ export const Statistic = () => {
     "Nov",
     "Dec",
   ];
+  const [fetchRecordByTimeRange] = useLazyGetRecordByTimeRangeQuery();
+  const [fetchRecordByCategory] = useLazyGetRecordByCategoryQuery();
+  const [fetchRecordByMoneySource] = useLazyGetRecordByMoneySourceQuery();
+  const [fetchTag, { data }] = useLazyGetAllTagsQuery();
+  const [recordList, setRecordList] = useState<Transaction[]>([]);
+  const [isLoading, setisLoading] = useState(true);
+  const [choosenCategory, setChoosenCategory] = useState(listIcon[0].label);
+
+  const [listSource, setListSource] = useState<string[]>([]);
+  const [choosenMoneySource, setChoosenMoneySource] = useState<string>("");
+
+  const [viewChoice, setViewChoice] = useState(typeList[0]);
   const [monthIndex, setMonthIndex] = useState(0);
   const [viewTime, setViewTime] = useState({
     month: months[monthIndex],
     year: 2024,
   });
-  const [recentSum, setRecentSum] = useState(210000);
-  const [limitSum, setLimitSum] = useState(500000);
+
   const types = ["Income", "Expense"];
   const [transType, setTransType] = useState(types[0]);
 
@@ -105,32 +124,39 @@ export const Statistic = () => {
       setViewTime({ ...viewTime, month: months[monthIndex] });
     }
   };
-  const [recordList, setRecordList] = useState(data)
+
+  const [categoryPercentage, setCatgoryPercentage] = useState({
+    Shopping: 25,
+    Food: 25,
+    Transport: 25,
+    Party: 25,
+  });
+  const [loadingGraph, setLoadingGraph] = useState(false);
   const graphData = [
     {
       name: "Food",
-      percent: 10,
+      percent: categoryPercentage.Food,
       color: transactionStyle("Food")?.backgroundIconColor,
       legendFontColor: "#7F7F7F",
       legendFontSize: 15,
     },
     {
       name: "Party",
-      percent: 20,
+      percent: categoryPercentage.Party,
       color: transactionStyle("Party")?.backgroundIconColor,
       legendFontColor: "#7F7F7F",
       legendFontSize: 15,
     },
     {
       name: "Transport",
-      percent: 40,
+      percent: categoryPercentage.Transport,
       color: transactionStyle("Transport")?.backgroundIconColor,
       legendFontColor: "#7F7F7F",
       legendFontSize: 15,
     },
     {
       name: "Shopping",
-      percent: 30,
+      percent: categoryPercentage.Shopping,
       color: transactionStyle("Shopping")?.backgroundIconColor,
       legendFontColor: "#7F7F7F",
       legendFontSize: 15,
@@ -141,74 +167,172 @@ export const Statistic = () => {
     color: (opacity = 1) => `rgba(81, 110, 252, ${opacity})`,
     labelColor: (opacity = 1) => Colors.TEXT_BOLD,
   };
+  const user = useSelector((state: RootState) => state.user);
+  const budget = useSelector((state: RootState) => state.budget);
+  const [recentSum, setRecentSum] = useState(0);
+  const [limitSum, setLimitSum] = useState(Number(budget.limitBudget));
+  const daysInMonth = [0, 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31];
+  const date = new Date(Date.now());
+  let currentMonth = "01";
+  if (date.getMonth() + 1 < 10) {
+    currentMonth = "0" + (date.getMonth() + 1).toString();
+  } else {
+    currentMonth = (date.getMonth() + 1).toString();
+  }
 
-  // react keep track of the value, not loosing the inital value when the UI is re-render
-  // const scrollY = useRef(new Animated.Value(0)).current;
-  const initialX = 0;
-  const initialY = 90;
-  const xOffset = useSharedValue(initialX);
-  const yOffset = useSharedValue(initialY);
-  const opacity = useSharedValue(0);
+  const fillterRecordByMonth = () => {
+    fetchRecordByTimeRange({
+      id: user.id,
+      startDate: `01-${currentMonth}-${date.getFullYear()}`,
+      endDate: `${
+        daysInMonth[date.getMonth()]
+      }-${currentMonth}-${date.getFullYear()}`,
+    })
+      .unwrap()
+      .then((fullfilled) => {
+        let totalAmount = 0;
+        fullfilled.map((item) => {
+          if (item.isIncome == false) {
+            totalAmount += item.amount;
+          }
+        });
+        setRecentSum(totalAmount);
+      })
+      .catch((rejected) => {});
+  };
+  const handleCategoryChoosen = (item: string, filter?: boolean) => {
+    setisLoading(true);
+    setChoosenCategory(item);
+    fetchRecordByCategory({ id: user.id, categoryName: item })
+      .unwrap()
+      .then((fullfilled: Transaction[]) => {
+        if (filter != undefined) {
+          setRecordList(fullfilled.filter((item) => item.isIncome === filter));
+        } else {
+          setRecordList(fullfilled);
+        }
+        setisLoading(false);
+      })
+      .catch((rejected) => {});
+  };
+  const handleMoneySourceChoosen = (item: string, filter?: boolean) => {
+    setisLoading(true);
+    setChoosenMoneySource(item);
+    fetchRecordByMoneySource({ id: user.id, moneySourceName: item })
+      .unwrap()
+      .then((fullfilled) => {
+        if (filter != undefined) {
+          setRecordList(fullfilled.filter((item) => item.isIncome === filter));
+        } else {
+          setRecordList(fullfilled);
+        }
+        setisLoading(false);
+      })
+      .catch((rejected) => {
+        setisLoading(false);
+      });
+  };
+  const delay = (ms: any) => new Promise((resolve) => setTimeout(resolve, ms));
 
-  const graphAnimated = useAnimatedStyle(() => {
-    return {
-      transform: [{ translateX: xOffset.value }, { translateY: yOffset.value }],
-      opacity: opacity.value,
-    };
-  });
-  useEffect(() => {
-    fetchRecords({id: getIDFromLocalStorage()});
-    if(transType == "Income"){
-      setRecordList(data?.filter((item: Transaction) => item.isIncome == true))
+  const calculateCategoryPercentage = async () => {
+    setLoadingGraph(true);
+    if (props.data == undefined) {
+      return;
     }
-    else{
-      setRecordList(data?.filter((item: Transaction) => item.isIncome == false))
-    }
-  }, [data]);
-  useEffect(() => {
-    if(transType == "Income"){
-      setRecordList(data?.filter((item: Transaction) => item.isIncome == true))
-    }
-    else{
-      setRecordList(data?.filter((item: Transaction) => item.isIncome == false))
-    }
-  }, [transType]);
-  // yOffset.value = withTiming(0);
-  // xOffset.value = withTiming(0);
-  // opacity.value = withTiming(0, { duration: 100 });
-  // yOffset.value = withDelay(
-  //   100,
-  //   withTiming(-20, {
-  //     duration: 300,
-  //     easing: Easing.bezier(0.1, 0.4, 0.7, 0.3),
-  //   })
-  // );
-  // xOffset.value = withDelay(
-  //   400,
-  //   withTiming(-70, {
-  //     duration: 200,
-  //     easing: Easing.bezier(0.1, 0.4, 0.7, 0.3),
-  //   })
-  // );
-  // opacity.value = withTiming(1, { duration: 700 });
-  useEffect(() => {
-    opacity.value = withTiming(0, { duration: 100 });
-    yOffset.value = withDelay(
-      100,
-      withTiming(-20, {
-        duration: 300,
-        easing: Easing.bezier(0.1, 0.4, 0.7, 0.3),
+    let length = props.data.length;
+    if (length <= 0) length = 1;
+    await fetchRecordByCategory({
+      id: user.id,
+      categoryName: listIcon[0].label,
+    })
+      .unwrap()
+      .then((fullfilled: Transaction[]) => {
+        const pct = (fullfilled.length * 100) / length;
+        setCatgoryPercentage((oldPct) => ({
+          ...oldPct,
+          [listIcon[0].label]: pct,
+        }));
       })
-    );
-    xOffset.value = withDelay(
-      400,
-      withTiming(-70, {
-        duration: 200,
-        easing: Easing.bezier(0.1, 0.4, 0.7, 0.3),
+      .catch((rejected) => {});
+    await fetchRecordByCategory({
+      id: user.id,
+      categoryName: listIcon[1].label,
+    })
+      .unwrap()
+      .then((fullfilled: Transaction[]) => {
+        setCatgoryPercentage((oldPct) => ({
+          ...oldPct,
+          [listIcon[1].label]: (fullfilled.length * 100) / length,
+        }));
       })
-    );
-    opacity.value = withTiming(1, { duration: 700 });
-  }, [isLoading]);
+      .catch((rejected) => {});
+    await fetchRecordByCategory({
+      id: user.id,
+      categoryName: listIcon[2].label,
+    })
+      .unwrap()
+      .then((fullfilled: Transaction[]) => {
+        setCatgoryPercentage((oldPct) => ({
+          ...oldPct,
+          [listIcon[2].label]: (fullfilled.length * 100) / length,
+        }));
+      })
+      .catch((rejected) => {});
+    await fetchRecordByCategory({
+      id: user.id,
+      categoryName: listIcon[3].label,
+    })
+      .unwrap()
+      .then((fullfilled: Transaction[]) => {
+        setCatgoryPercentage((oldPct) => ({
+          ...oldPct,
+          [listIcon[3].label]: (fullfilled.length * 100) / length,
+        }));
+      })
+      .catch((rejected: string) => {
+        console.log(rejected);
+      });
+    setLoadingGraph(false);
+    console.log(categoryPercentage);
+    console.log(graphData);
+  };
+  useEffect(() => {
+    fetchTag({ id: user.id })
+      .unwrap()
+      .then((fullfilled: Tag[]) => {
+        setListSource(
+          fullfilled
+            .map((item) => item.title)
+            .filter((item) => item.split("_")[1] == "undefined")
+        );
+        setChoosenMoneySource(listSource[0]);
+        // handleMoneySourceChoosen(listSource[0]);
+      })
+      .catch((rejected) => {});
+  }, []);
+
+  useEffect(() => {
+    if (viewChoice == typeList[0]) {
+      handleCategoryChoosen(choosenCategory, transType == types[0]);
+    } else {
+      handleMoneySourceChoosen(choosenMoneySource, transType == types[0]);
+    }
+  }, [transType, props.data]);
+
+  useEffect(() => {
+    const tempFunc = async () => await calculateCategoryPercentage();
+    if (viewChoice == typeList[0]) {
+      handleCategoryChoosen(listIcon[0].label, transType == types[0]);
+      tempFunc();
+    } else {
+      handleMoneySourceChoosen(listSource[0], transType == types[0]);
+      fillterRecordByMonth();
+    }
+  }, [viewChoice]);
+  useEffect(() => {
+    setLimitSum(Number(budget.limitBudget));
+  }, [budget.limitBudget]);
+
   return (
     <SafeAreaView style={{ display: "flex", backgroundColor: Colors.WHITE }}>
       <Header
@@ -234,7 +358,7 @@ export const Statistic = () => {
               gap: 8,
             }}
             horizontal
-            data={listChoice}
+            data={typeList}
             renderItem={({ item }) => (
               <Pressable
                 onPress={() => setViewChoice(item)}
@@ -280,7 +404,7 @@ export const Statistic = () => {
             <Text>Month</Text>
           </Pressable>
         </View>
-        <View
+        {/* <View
           style={{
             display: "flex",
             justifyContent: "space-between",
@@ -298,8 +422,8 @@ export const Statistic = () => {
           <Pressable onPress={() => changeViewTime(1)}>
             <ArrowRight fill={Colors.TEXT_BOLD} />
           </Pressable>
-        </View>
-        <View>
+        </View> */}
+        <View style={{ marginTop: 20 }}>
           <FlatList
             scrollEnabled={false}
             horizontal
@@ -336,175 +460,265 @@ export const Statistic = () => {
                 display: "flex",
                 justifyContent: "center",
                 alignItems: "center",
-                width: "100%",
                 marginTop: 10,
               },
             ]}
           >
-            
-            {viewChoice == listChoice[0] && (
-              <View style={{ flexDirection: "row" }}>
-                <Animated.View style={[graphAnimated]}>
-                  <PieChart
-                    paddingLeft={"0"}
-                    data={graphData}
-                    width={Dimensions.get("screen").width}
-                    height={300}
-                    chartConfig={chartConfig}
-                    accessor={"percent"}
-                    backgroundColor={"transparent"}
-                    center={[Dimensions.get("screen").width / 4, 0]}
-                    hasLegend={false}
-                  />
-                </Animated.View>
-                <MotiView from={{opacity: 0}} animate={{opacity: 1}} delay={500} transition={{type:'timing'}} style={{ position: "absolute", right: 20, alignSelf:'center' }}>
-                  {[...Array(4).keys()].map((i) => (
-                    <View
+            {viewChoice == typeList[0] && (
+              <View>
+                {loadingGraph ? (
+                  <View style={{justifyContent:'center', alignItems:'center'}}>
+                    <LottieView
+                      autoPlay
                       style={{
-                        padding: 10,
-                        backgroundColor: listIconColor[i],
-                        flexDirection: "row",
-                        marginBottom: 4,
-                        alignItems: "center",
-                        borderRadius: 12,
-                        gap: 5,
-                        elevation: 2
+                        height: 200,
+                        alignSelf: "center",
+                        backgroundColor: Colors.TRANSPARENT,
                       }}
-                      key={i}
-                    >
-                      {listIcon[i]}
-                      <Text style={{ color: Colors.WHITE, fontWeight: "600", fontSize: 14 }}>
-                        {listIconLabel[i]}
-                      </Text>
-                    </View>
-                  ))}
-                </MotiView>
+                      // Find more Lottie files at https://lottiefiles.com/featured
+                      source={require("../../../assets/anim/loading_anim2.json")}
+                    />
+                    <Text style={{fontWeight:'500', fontSize: 18, color:Colors.LIGHT_GRAY}}>Configuring graph...</Text>
+                  </View>
+                ) : (
+                  <>
+                    {props.data.length == 0 ? (
+                      <></>
+                    ) : (
+                      <View style={{ flexDirection: "row" }}>
+                        <View
+                          style={{
+                            flexDirection: "column",
+                            alignItems: "center",
+                          }}
+                        >
+                          <PieChart
+                            paddingLeft={"0"}
+                            data={graphData}
+                            width={Dimensions.get("screen").width}
+                            height={240}
+                            chartConfig={chartConfig}
+                            accessor={"percent"}
+                            backgroundColor={"transparent"}
+                            center={[0 + 20, 0]}
+                            hasLegend={false}
+                          />
+                          <FlatList
+                            horizontal
+                            style={{ flexDirection: "row" }}
+                            data={listIcon}
+                            contentContainerStyle={{
+                              gap: 4,
+                              paddingHorizontal: 16,
+                              paddingVertical: 5,
+                            }}
+                            renderItem={({ item, index }) => (
+                              <View
+                                style={{
+                                  padding: 6,
+                                  borderColor: Colors.LIGHT_GRAY,
+                                  borderWidth: 2,
+                                  borderRadius: 17,
+                                }}
+                              >
+                                <Text
+                                  style={{ fontWeight: "500", fontSize: 16 }}
+                                >
+                                  {listIcon[index].label} :{" "}
+                                  {Number(
+                                    categoryPercentage[item.label]
+                                  ).toFixed(2)}
+                                  %
+                                </Text>
+                              </View>
+                            )}
+                          ></FlatList>
+                        </View>
+                        <MotiView
+                          from={{ opacity: 0 }}
+                          animate={{ opacity: 1 }}
+                          delay={400}
+                          transition={{ type: "timing" }}
+                          style={{
+                            position: "absolute",
+                            right: 20,
+                            alignSelf: "center",
+                          }}
+                        >
+                          {listIcon.map((item, index) => (
+                            <Pressable
+                              style={{
+                                padding: 9,
+                                backgroundColor:
+                                  choosenCategory === item.label
+                                    ? listIcon[index].color
+                                    : Colors.TEXT_LIGHT,
+                                flexDirection: "row",
+                                marginBottom: 8,
+                                alignItems: "center",
+                                borderRadius: 12,
+                                gap: 5,
+                                elevation: 2,
+                              }}
+                              key={index}
+                              onPress={() =>
+                                handleCategoryChoosen(
+                                  item.label,
+                                  transType == types[0]
+                                )
+                              }
+                            >
+                              {listIcon[index].icon}
+                              <Text
+                                style={{
+                                  color: Colors.WHITE,
+                                  fontWeight: "700",
+                                  fontSize: 15,
+                                }}
+                              >
+                                {item.label}
+                              </Text>
+                            </Pressable>
+                          ))}
+                        </MotiView>
+                      </View>
+                    )}
+                  </>
+                )}
               </View>
             )}
-            {viewChoice == listChoice[1] && (
-              <View
-                style={{
-                  backgroundColor: Colors.BACKGROUND,
-                  display: "flex",
-                  flexDirection: "column",
-                  width: "100%",
-                  paddingVertical: 10,
-                  paddingHorizontal: 20,
-                  borderRadius: 18,
-                  gap: 5,
-                }}
-              >
+            {viewChoice == typeList[1] && (
+              <>
                 <View
                   style={{
+                    backgroundColor: Colors.BACKGROUND,
                     display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "space-between",
+                    flexDirection: "column",
+                    width: "100%",
+                    paddingVertical: 10,
+                    paddingHorizontal: 20,
+                    borderRadius: 18,
+                    gap: 5,
                   }}
                 >
-                  <View>
-                    <Text
-                      style={{
-                        fontWeight: "400",
-                        fontSize: 18,
-                        color: Colors.LIGHT_GRAY,
-                      }}
-                    >
-                      Remain(month)
-                    </Text>
-                    <Text style={{ fontWeight: "600", fontSize: 24 }}>
-                      {recentSum}
-                    </Text>
-                  </View>
-                  <Pressable
-                    style={{
-                      display: "flex",
-                      flexDirection: "row",
-                      justifyContent: "center",
-                      alignItems: "center",
-                      alignSelf: "flex-start",
-                      gap: 10,
-                      backgroundColor: Colors.STROKE,
-                      padding: 5,
-                      borderRadius: 8,
-                      overflow: "hidden",
-                    }}
-                  >
-                    <Text
-                      style={{
-                        fontWeight: "400",
-                        fontSize: 16,
-                        paddingLeft: 8,
-                      }}
-                    >
-                      Ngân quỹ
-                    </Text>
-                    <ArrowRight
-                      fill={Colors.TEXT_BOLD}
-                      width={20}
-                      height={20}
-                    />
-                  </Pressable>
-                </View>
-                <View
-                  style={{
-                    display: "flex",
-                    flexDirection: "row",
-                    justifyContent: "space-between",
-                  }}
-                >
-                  <Text
-                    style={{
-                      color: Colors.PRIMARY,
-                      fontSize: 18,
-                      fontWeight: "500",
-                    }}
-                  >
-                    {limitSum}
-                  </Text>
                   <View
                     style={{
                       display: "flex",
-                      flexGrow: 0.7,
-                      flexDirection: "column",
+                      flexDirection: "row",
+                      justifyContent: "flex-start",
+                      flexGrow: 1,
                     }}
                   >
-                    <View
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        borderRadius: 8,
-                        overflow: "hidden",
-                        height: 35,
-                      }}
-                    >
-                      <View
+                    <View style={{}}>
+                      <Text
                         style={{
-                          backgroundColor: Colors.GREEN_80,
-                          flexGrow: recentSum / limitSum,
+                          fontWeight: "400",
+                          fontSize: 18,
+                          color: Colors.LIGHT_GRAY,
                         }}
-                      ></View>
-                      <View
-                        style={{
-                          backgroundColor: Colors.TEXT_LIGHT,
-                          flexGrow: 1 - recentSum / limitSum,
-                        }}
-                      ></View>
-                    </View>
-                    <View
-                      style={{
-                        display: "flex",
-                        flexDirection: "row",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Text style={{ fontSize: 16, color: Colors.GREEN_80 }}>
-                        {recentSum}
+                        ellipsizeMode="tail"
+                      >
+                        This month you have spend
                       </Text>
-                      <Text style={{ fontSize: 16 }}>{limitSum}</Text>
+                      <Text style={{ fontWeight: "600", fontSize: 24 }}>
+                        {moneyConvert(Number(recentSum))}
+                      </Text>
                     </View>
                   </View>
+                  <View
+                    style={{
+                      display: "flex",
+                      flexDirection: "row",
+                      justifyContent: "space-between",
+                      alignItems: "center",
+                      flexGrow: 1,
+                    }}
+                  >
+                    <View style={{ flex: 1 }}>
+                      <Text
+                        style={{
+                          color: Colors.PRIMARY,
+                          fontSize: 18,
+                          fontWeight: "500",
+                          flexWrap: "wrap",
+                        }}
+                        numberOfLines={1}
+                        ellipsizeMode="tail"
+                      >
+                        {moneyConvert(Number(limitSum))}
+                      </Text>
+                    </View>
+                    <Pressable
+                      style={{
+                        display: "flex",
+                        flexDirection: "row",
+                        justifyContent: "center",
+                        alignItems: "center",
+                        alignSelf: "flex-start",
+                        gap: 10,
+                        backgroundColor: Colors.STROKE,
+                        padding: 5,
+                        borderRadius: 8,
+                        overflow: "hidden",
+                      }}
+                      onPress={() => navigation.navigate(RootScreens.BUDGET)}
+                    >
+                      <Text
+                        style={{
+                          fontWeight: "400",
+                          fontSize: 16,
+                          paddingLeft: 8,
+                        }}
+                      >
+                        Your Budget
+                      </Text>
+                      <ArrowRight
+                        fill={Colors.TEXT_BOLD}
+                        width={18}
+                        height={18}
+                      />
+                    </Pressable>
+                  </View>
                 </View>
-              </View>
+                <FlatList
+                  horizontal
+                  contentContainerStyle={{
+                    gap: 10,
+                    width: "100%",
+                    marginBottom: 10,
+                  }}
+                  data={listSource}
+                  renderItem={({ item, index }) => (
+                    <Pressable
+                      onPress={() => {
+                        handleMoneySourceChoosen(item, transType == types[0]);
+                      }}
+                      style={{
+                        backgroundColor:
+                          choosenMoneySource == item
+                            ? Colors.PRIMARY
+                            : Colors.STROKE,
+                        padding: 10,
+                        borderRadius: 12,
+                      }}
+                      key={index}
+                    >
+                      <Text
+                        style={{
+                          color:
+                            choosenMoneySource == item
+                              ? Colors.WHITE
+                              : Colors.LIGHT_GRAY,
+                          fontSize: 16,
+                          fontWeight: "500",
+                        }}
+                      >
+                        {item.split("_")[0]}
+                      </Text>
+                    </Pressable>
+                  )}
+                />
+              </>
             )}
           </View>
         </View>
@@ -526,16 +740,46 @@ export const Statistic = () => {
             ))}
           </MotiScrollView>
         ) : (
-          <FlatList
-            contentContainerStyle={{ gap: 10, paddingBottom: 10, flexGrow: 1 }}
-            data={recordList}
-            renderItem={({ item, index }) => (
-              <TransactionItem
-                {...item}
-                key={index}
+          <>
+            {recordList.length == 0 ? (
+              <ScrollView
+                contentContainerStyle={{
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: "100%",
+                  flexDirection: "column",
+                  marginTop: 20,
+                }}
+              >
+                <EmptyIcon
+                  stroke={Colors.LIGHT_GRAY}
+                  width={100}
+                  height={100}
+                />
+                <Text
+                  style={{
+                    color: Colors.LIGHT_GRAY,
+                    fontWeight: "600",
+                    fontSize: 17,
+                  }}
+                >
+                  No record
+                </Text>
+              </ScrollView>
+            ) : (
+              <FlatList
+                contentContainerStyle={{
+                  gap: 10,
+                  paddingVertical: 10,
+                  flexGrow: 1,
+                }}
+                data={recordList}
+                renderItem={({ item, index }) => (
+                  <TransactionItem {...item} key={index} />
+                )}
               />
             )}
-          />
+          </>
         )}
       </View>
     </SafeAreaView>

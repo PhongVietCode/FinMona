@@ -1,7 +1,7 @@
 import { RootStackParamList } from "@/Navigation";
 import { useNavigation } from "@react-navigation/native";
 import { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { Dimensions, Pressable, StyleSheet, Text, View } from "react-native";
+import { Dimensions, Platform, Pressable, StyleSheet, Text, View } from "react-native";
 import ArrowLeft from "../../../assets/icons/arrow-left.svg";
 import { Colors, FontSize } from "@/Theme/Variables";
 import { Header } from "@/Components/Header/Header";
@@ -19,24 +19,21 @@ import { BottomSheet } from "react-native-btr";
 import BankIcon from "../../../assets/icons/bank.svg";
 import { DropDown } from "@/Components/DropDown/DropDown";
 import { Transaction } from "@/Components/TransactionItem/TransactionItem";
-import {
-  Tag,
-  getIDFromLocalStorage,
-  useAddRecordMutation,
-  useLazyGetAllTagsQuery,
-} from "@/Services";
+import { Tag, useAddRecordMutation, useLazyGetAllTagsQuery } from "@/Services";
+import { useSelector } from "react-redux";
+import { RootState } from "@/Store";
+import * as Sentry from '@sentry/react-native' 
 export const AddTransaction = () => {
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
 
   const initialForm: Omit<Transaction, "id" | "dateCreated" | "user"> = {
     isIncome: true,
-    repeat: false,
+    // repeat: false,
     amount: 0,
     category: "",
     moneySource: "",
     description: "",
-    dateRepeat: "",
   };
   const types = ["Income", "Expense"];
   const [transType, setTransType] = useState(types[0]);
@@ -49,211 +46,27 @@ export const AddTransaction = () => {
   const [showMoneySource, setShowMoneySource] = useState(false);
   const [showMoneyCategory, setshowMoneyCategory] = useState(false);
   const [showRepeat, setShowRepeat] = useState(false);
-
-  const [moneySourceList, setMoneySourceList] = useState([
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-  ]);
-  const [moneyCatList, setMoneyCatList] = useState([
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-    {
-      icon: [
-        <BankIcon fill={Colors.PRIMARY} />,
-        <BankIcon fill={Colors.WHITE} />,
-      ],
-      lable: "Bank",
-    },
-  ]);
-
   const [addRecord, addRecordResult] = useAddRecordMutation();
 
   const [fetchTag, { data, isLoading, isFetching }] = useLazyGetAllTagsQuery();
+  const user = useSelector((state: RootState) => state.user);
 
+  const [isEmpty, setIsEmpty] = useState(false);
   useEffect(() => {
-    fetchTag({ id: getIDFromLocalStorage() });
+    fetchTag({ id: user.id });
   }, [data]);
   const handleSave = (e: any) => {
-    addRecord({ id: getIDFromLocalStorage(), body: form });
-    console.log(form)
+    if (form.moneySource == "" || form.category == "" || form.amount == 0) {
+      setIsEmpty(true);
+    } else {
+      navigation.goBack();
+      setIsEmpty(false);
+      addRecord({ id: user.id, body: form });
+      setForm(initialForm);
+      Sentry.metrics.increment("measurements.stall_count", 1, {
+        tags: { os: Platform.OS},
+      });
+    }
   };
   return (
     <SafeAreaView style={styles.container}>
@@ -309,84 +122,56 @@ export const AddTransaction = () => {
               )}
             />
           </View>
-          <View>
-            <InputItem
-              showKeyboard={false}
-              value={form.dateRepeat}
-              label="Date"
-              onChangeText={(date) => {
-                setForm({ ...form, dateRepeat: date.toString() });
-              }}
-              placeholder="dd-mm-yyyy"
-              right={
-                <TextInput.Icon
-                  icon={"calendar"}
-                  color={Colors.LIGHT_GRAY}
-                  onPress={(e) => {
-                    setOpen((prev) => !prev);
-                    e.stopPropagation();
-                  }}
-                />
-              }
-            />
-          </View>
-          {open && (
-            <DateTimePicker
-              value={date}
-              mode={"date"}
-              is24Hour={true}
-              aria-modal
-              onChange={(event, date) => {
-                setOpen(false);
-                if (date) {
-                  setDate(date);
-                  const choosenDate =
-                    date.getDate() +
-                    "-" +
-                    date.getMonth() +
-                    "-" +
-                    date.getFullYear();
-                  setForm({ ...form, dateRepeat: choosenDate });
-                }
-              }}
-            />
-          )}
+          <View></View>
           <View style={{ display: "flex", flexDirection: "row", gap: 10 }}>
-            <InputItem
-              showKeyboard={false}
-              value={form.moneySource.split("_")[0]}
-              label="Money Source*: "
-              onChangeText={(moneySource: any) =>
-                setForm({ ...form, moneySource })
-              }
-              placeholder="...."
-              right={
-                <TextInput.Icon
-                  icon={"chevron-down"}
-                  color={Colors.LIGHT_GRAY}
-                  onPress={(e) => {
-                    setShowMoneySource(true);
-                  }}
-                />
-              }
-            />
-
-            <InputItem
-              showKeyboard={false}
-              value={form.category.split("_")[0]}
-              label="Category*: "
-              onChangeText={(category: any) => setForm({ ...form, category })}
-              placeholder="...."
-              right={
-                <TextInput.Icon
-                  icon={"chevron-down"}
-                  color={Colors.LIGHT_GRAY}
-                  onPress={(e) => {
-                    setshowMoneyCategory(true);
-                  }}
-                />
-              }
-            />
+            <View style={{ flex: 1 }}>
+              <InputItem
+                showKeyboard={false}
+                value={form.moneySource.split("_")[0]}
+                label="Money Source*: "
+                onChangeText={(moneySource: any) =>
+                  setForm({ ...form, moneySource })
+                }
+                placeholder="...."
+                right={
+                  <TextInput.Icon
+                    icon={"chevron-down"}
+                    color={Colors.LIGHT_GRAY}
+                    onPress={(e) => {
+                      setShowMoneySource(true);
+                    }}
+                  />
+                }
+              />
+              {isEmpty && form.moneySource.length == 0 ? (
+                <Text style={{ color: Colors.WARN }}>Must not empty</Text>
+              ) : (
+                <></>
+              )}
+            </View>
+            <View style={{ flex: 1 }}>
+              <InputItem
+                showKeyboard={false}
+                value={form.category.split("_")[0]}
+                label="Category*: "
+                onChangeText={(category: any) => setForm({ ...form, category })}
+                placeholder="...."
+                right={
+                  <TextInput.Icon
+                    icon={"chevron-down"}
+                    color={Colors.LIGHT_GRAY}
+                    onPress={(e) => {
+                      setshowMoneyCategory(true);
+                    }}
+                  />
+                }
+              />
+              {isEmpty && form.category.length == 0 ? (
+                <Text style={{ color: Colors.WARN }}>Must not empty</Text>
+              ) : (
+                <></>
+              )}
+            </View>
           </View>
           <View>
             <InputItem
@@ -404,7 +189,7 @@ export const AddTransaction = () => {
             <InputItem
               showKeyboard={true}
               value={form.description}
-              label="Description*: "
+              label="Description: "
               onChangeText={(description: any) =>
                 setForm({ ...form, description })
               }
@@ -443,7 +228,6 @@ export const AddTransaction = () => {
               textColors={Colors.WHITE}
               icon={undefined}
               onPress={(e: any) => {
-                navigation.goBack();
                 handleSave(e);
               }}
               textStyle={FontSize.REGULAR}

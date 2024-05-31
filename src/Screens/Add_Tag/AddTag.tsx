@@ -23,7 +23,6 @@ import { BigButton } from "@/Components/BigButton/BigButton";
 import { InputItem } from "@/Components/Input/InputItem";
 import {
   Tag,
-  getIDFromLocalStorage,
   useAddTagMutation,
   useLazyGetAllRecordsQuery,
   useLazyGetAllTagsQuery,
@@ -31,6 +30,8 @@ import {
 import { TextInput } from "react-native-paper";
 import { gStyles } from "@/Theme";
 import { transactionStyle } from "@/Components/TransactionItem/TransactionItem";
+import { useSelector } from "react-redux";
+import { RootState } from "@/Store";
 
 export const AddTag = () => {
   const initialForm: Omit<Tag, "id"> = {
@@ -47,11 +48,13 @@ export const AddTag = () => {
   const [activeItem, setActiveItem] = useState(list[0]);
 
   const [addTag, addTagResult] = useAddTagMutation();
+  const user = useSelector((state: RootState) => state.user)
+
   const handleSaveTag = async (event: any) => {
     setShowAddModal(false);
     if (formAddTag.title != "") {
       await addTag({
-        id: getIDFromLocalStorage(),
+        id: user.id,
         body: {
           ...formAddTag,
           title: formAddTag.title + "_" + formAddTag.icon,
@@ -66,7 +69,7 @@ export const AddTag = () => {
   const [fetchTag, { data, isLoading, isFetching }] = useLazyGetAllTagsQuery();
 
   useEffect(() => {
-    fetchTag({ id: getIDFromLocalStorage() });
+    fetchTag({ id: user.id});
   }, [data]);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
@@ -92,7 +95,7 @@ export const AddTag = () => {
         }
       ></Header>
       <ScrollView style={{ paddingHorizontal: 16 }}>
-        <Text style={[gStyles.title2]}>Category</Text>
+        <Text style={[gStyles.title2]}>Category: </Text>
         {isLoading ? (
           <Text>Loading Tags...</Text>
         ) : (
@@ -110,7 +113,7 @@ export const AddTag = () => {
               })}
           </View>
         )}
-        <Text style={[gStyles.title2]}>Money Source</Text>
+        <Text style={[gStyles.title2]}>Money Source: </Text>
         {isLoading ? (
           <Text>Loading Tags...</Text>
         ) : (

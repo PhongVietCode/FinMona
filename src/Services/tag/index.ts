@@ -37,7 +37,7 @@ const tagApi = TAG_API.injectEndpoints({
           headers: {
             Authorization: `Bearer ${getTokenFromLocalStorage()}`,
           },
-          body: data.body
+          body: JSON.stringify(data.body)
         }),
         invalidatesTags: (result, error, data) => [{type: "Tags", id: "LIST"}]
       }),

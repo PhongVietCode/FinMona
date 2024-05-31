@@ -19,8 +19,10 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-import { Colors, FontSize } from "@/Theme/Variables";
+import { Colors } from "@/Theme/Variables";
 import { RootScreens } from "@/Screens";
+import { useSelector } from "react-redux";
+import { RootState } from "@/Store";
 const Tab = createBottomTabNavigator();
 
 const AddNewTransactionButton = (props: any) => (
@@ -41,7 +43,6 @@ const AddNewTransactionButton = (props: any) => (
         display: "flex",
         justifyContent: "center",
         alignItems: "center",
-        
       }}
     >
       <AddIcon width={24} height={24} fill={Colors.WHITE} />
@@ -51,7 +52,8 @@ const AddNewTransactionButton = (props: any) => (
 // @refresh reset
 export const MainNavigator = () => {
   const navigation =
-  useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const bagdeCount = useSelector((state: RootState) => state.notify.badgeCount);
   return (
     <Tab.Navigator
       screenOptions={{
@@ -110,15 +112,25 @@ export const MainNavigator = () => {
         name=" "
         component={NotifyContainer}
         options={{
-          tabBarButton: (props) => <AddNewTransactionButton props={props} onPress={() => navigation.navigate(RootScreens.ADDTRANS)} />,
+          tabBarButton: (props) => (
+            <AddNewTransactionButton
+              props={props}
+              onPress={() => navigation.navigate(RootScreens.ADDTRANS)}
+            />
+          ),
         }}
       />
       <Tab.Screen
         name="Notification"
         component={NotifyContainer}
         options={{
-          tabBarBadge: 1,
-          tabBarBadgeStyle:{backgroundColor: Colors.ERROR,color:Colors.WHITE, fontWeight: '700' },
+          tabBarBadge: bagdeCount,
+          tabBarBadgeStyle: {
+            backgroundColor: Colors.ERROR,
+            color: Colors.WHITE,
+            fontWeight: "700",
+            display: bagdeCount ? 'flex' : 'none'
+          },
           tabBarIcon: ({ focused }) => (
             <View style={style.btn_nav}>
               <BellIcon fill={focused ? Colors.PRIMARY : Colors.LIGHT_GRAY} />

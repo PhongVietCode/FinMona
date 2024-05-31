@@ -1,4 +1,4 @@
-import { StyleSheet, Text, View } from "react-native";
+import { KeyboardTypeOptions, StyleSheet, Text, View } from "react-native";
 import { Colors, FontSize } from "@/Theme/Variables";
 import { TextInput } from "react-native-paper";
 import { ReactNode } from "react";
@@ -9,7 +9,8 @@ export interface InputItemProps {
   placeholder: string;
   right: ReactNode;
   value: string;
-  showKeyboard: boolean
+  showKeyboard: boolean,
+  keyboardType?: KeyboardTypeOptions
 }
 export const InputItem = (props: InputItemProps) => {
   return (
@@ -24,6 +25,7 @@ export const InputItem = (props: InputItemProps) => {
         onChangeText={props.onChangeText}
         right={props.right}
         value={props.value}
+        keyboardType={props.keyboardType || 'default'}
       ></TextInput>
     </View>
   );
