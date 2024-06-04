@@ -15,7 +15,8 @@ export const HomeContainer = () => {
   useEffect(() => {
     fetchRecords({ id: user.id })
       .unwrap()
-      .then((fullfilled) => {})
+      .then((fullfilled) => {
+      })
       .catch((rejected) => {});
   }, [data]);
 

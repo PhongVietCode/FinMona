@@ -1,6 +1,13 @@
 import { Checkbox, Stack } from "native-base";
 import React, { useState } from "react";
-import { Alert, Pressable, SafeAreaView, Text, View } from "react-native";
+import {
+  Alert,
+  Pressable,
+  SafeAreaView,
+  ScrollView,
+  Text,
+  View,
+} from "react-native";
 import { gStyles } from "../../Theme";
 import { styles } from "./SignUp.style";
 import { UserInput } from "@/Components";
@@ -11,6 +18,9 @@ import { NativeStackNavigationProp } from "@react-navigation/native-stack";
 import { RootStackParamList } from "@/Navigation";
 import { RootScreens } from "..";
 import { UserSignInInfo, useSignInUserMutation } from "@/Services";
+import LottieView from "lottie-react-native";
+import { Header } from "@/Components/Header/Header";
+
 const SignUp = () => {
   const [checkPass, setCheckPass] = useState(false);
   const [isEmpty, setIsEmpty] = useState(false);
@@ -21,6 +31,7 @@ const SignUp = () => {
     password: "",
     avatar: "",
   });
+  const [submit, setSubmit] = useState(false);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const [login] = useSignInUserMutation();
@@ -36,6 +47,7 @@ const SignUp = () => {
       setIsEmpty(false);
     }
     if (!checkPass && isChecked) {
+      setSubmit(true);
       login({ body: form })
         .unwrap()
         .then((fullfilled: any) => {
@@ -63,6 +75,7 @@ const SignUp = () => {
                 style: "cancel",
               },
             ]);
+            setSubmit(false);
           }
         })
         .catch((rejected) => {});
@@ -70,10 +83,12 @@ const SignUp = () => {
   };
   return (
     <SafeAreaView style={{ backgroundColor: Colors.WHITE, flex: 1 }}>
-      <View style={styles.header}>
-        <Text style={gStyles.title1}>Sign up</Text>
-      </View>
-      <View style={styles.container}>
+      <Header
+        left={<View></View>}
+        right={<View></View>}
+        center={<Text style={gStyles.title1}>Sign up</Text>}
+      />
+      <ScrollView contentContainerStyle={styles.container}>
         <View style={styles.inputContainer}>
           <View>
             <UserInput
@@ -173,16 +188,29 @@ const SignUp = () => {
             </Text>
           </Text>
         </View>
-        <BigButton
-          text={"Sign Up"}
-          backgroundColor={Colors.PRIMARY}
-          textColors={Colors.WHITE}
-          icon={undefined}
-          onPress={() => {
-            handleLogin();
-          }}
-          textStyle={FontSize.REGULAR}
-        />
+        {submit ? (
+          <LottieView
+            autoPlay
+            style={{
+              height: 100,
+              backgroundColor: Colors.TRANSPARENT,
+            }}
+            // Find more Lottie files at https://lottiefiles.com/featured
+            source={require("../../../assets/anim/loading_anim2.json")}
+          />
+        ) : (
+          <BigButton
+            text={"Sign Up"}
+            backgroundColor={Colors.PRIMARY}
+            textColors={Colors.WHITE}
+            icon={undefined}
+            onPress={() => {
+              handleLogin();
+            }}
+            textStyle={FontSize.REGULAR}
+          />
+        )}
+
         <Text style={[gStyles.title3, { color: Colors.LIGHT_GRAY }]}>
           Already have account ?{" "}
           <Text
@@ -194,7 +222,7 @@ const SignUp = () => {
             Login
           </Text>
         </Text>
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 };

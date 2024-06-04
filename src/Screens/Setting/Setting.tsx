@@ -28,7 +28,7 @@ import BudgetIcon from "../../../assets/icons/Initiate Money Transfer.svg";
 import Manager from "../../../assets/icons/manager.svg";
 import CreditCardIcon from '../../../assets/icons/credit-cards.svg'
 export const Setting: FunctionComponent = () => {
-  const userImg = ("https://images.unsplash.com/photo-1716319487101-108ceed67fcb?q=80&w=2187&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
+  const userImg = ("https://images.unsplash.com/photo-1533038590840-1cde6e668a91?q=80&w=1587&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D");
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const user = useSelector((state: RootState) => state.user);

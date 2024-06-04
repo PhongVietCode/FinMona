@@ -10,7 +10,7 @@ import {
   ScrollView,
 } from "react-native";
 import ArrowUp from "../../../assets/icons/arrow-up-circle.svg";
-import * as Sentry from '@sentry/react-native';
+import * as Sentry from "@sentry/react-native";
 import EyeShow from "../../../assets/icons/eye-alt.svg";
 import Search from "../../../assets/icons/search-alt.svg";
 import { Colors, FontSize } from "@/Theme/Variables";
@@ -174,7 +174,6 @@ export const Home = (props: HomeProps) => {
   const getTotalAmountByDay = async () => {
     let data = [0, 0, 0, 0, 0, 0, 0];
     setLoadGraph(true);
-
     await fetchRecordByTimeRange({
       id: user.id,
       startDate: `${startOfWeek}-${startMonth}-${date.getFullYear()}`,
@@ -182,6 +181,7 @@ export const Home = (props: HomeProps) => {
     })
       .unwrap()
       .then((fullfilled: Transaction[]) => {
+        console.log(startOfWeek)
         let date = startOfWeek + 1;
         for (let i = 0; i < 7; i++) {
           if (date > daysInMonth[month]) {
@@ -198,17 +198,18 @@ export const Home = (props: HomeProps) => {
         setListRecord(fullfilled);
       })
       .catch((rejected: any) => {
-        Sentry.captureException(rejected)
+        Sentry.captureException(rejected);
       });
     setLoadGraph(false);
   };
   const getTotalAmountByWeek = async () => {
     let data = [0, 0, 0, 0];
     setLoadGraph(true);
+    console.log(month);
     await fetchRecordByTimeRange({
       id: user.id,
-      startDate: `01-${month}-${date.getFullYear()}`,
-      endDate: `${31}-${month}-${date.getFullYear()}`,
+      startDate: `01-0${month}-${date.getFullYear()}`,
+      endDate: `${31}-0${month}-${date.getFullYear()}`,
     })
       .unwrap()
       .then((fullfilled: Transaction[]) => {
@@ -352,7 +353,7 @@ export const Home = (props: HomeProps) => {
           >
             <ImageBackground
               source={{
-                uri: "https://images.unsplash.com/photo-1716319487101-108ceed67fcb?q=80&w=2187&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
+                uri: "https://images.unsplash.com/photo-1533038590840-1cde6e668a91?q=80&w=1587&auto=format&fit=crop&ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D",
               }}
               resizeMode="cover"
               style={{ flex: 1, width: "100%", transform: [{ scale: 1.2 }] }}
@@ -370,7 +371,7 @@ export const Home = (props: HomeProps) => {
               { fontSize: 17, color: Colors.LIGHT_GRAY, fontWeight: "400" },
             ]}
           >
-            Account Balance
+            Total Income
           </Text>
           <Pressable
             onPress={() => {
@@ -537,8 +538,8 @@ export const Home = (props: HomeProps) => {
           </MotiScrollView>
         ) : (
           <View>
-            {listRecord.length == 0 ? (
-              <View style={{ alignItems: "center" }}>
+            {props.data?.length == 0 ? (
+              <View style={{ alignItems: "center", paddingVertical: 5 }}>
                 <EmptyIcon
                   stroke={Colors.LIGHT_GRAY}
                   width={100}
@@ -556,7 +557,7 @@ export const Home = (props: HomeProps) => {
               </View>
             ) : (
               <View>
-                {listRecord.map((item, index) => (
+                {props.data?.map((item, index) => (
                   <TransactionItem {...item} key={index} />
                 ))}
               </View>

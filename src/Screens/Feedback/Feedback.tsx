@@ -16,13 +16,13 @@ export const FeedbackScreen = () => {
   const [feedbackMsg, setFeedbackMsg] = useState("");
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
-    const user = useSelector((state:RootState) => state.user)
+  const user = useSelector((state: RootState) => state.user);
   const sendFeedback = () => {
     if (feedbackMsg != "") {
       const sentryId = Sentry.captureMessage(user.id);
       const userFeedback: UserFeedback = {
         event_id: sentryId,
-        name: user.name ,
+        name: user.name,
         email: user.email,
         comments: feedbackMsg,
       };
@@ -37,7 +37,7 @@ export const FeedbackScreen = () => {
   };
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: Colors.WHITE }}>
-      <View style={{ flexGrow: 1, paddingHorizontal: 16 }}>
+      <View style={{ flexGrow: 1, paddingHorizontal: 16, paddingVertical: 16 }}>
         <ScrollView>
           <InputItem
             onChangeText={(val) => {
@@ -50,27 +50,27 @@ export const FeedbackScreen = () => {
             showKeyboard={true}
           />
         </ScrollView>
-
-        <BigButton
-          text={"Send"}
-          backgroundColor={Colors.PRIMARY}
-          textColors={Colors.WHITE}
-          icon={undefined}
-          onPress={() => sendFeedback()}
-          textStyle={FontSize.REGULAR}
-        />
-        <View style={{ height: 10 }}></View>
-        <BigButton
-          text={"Cancle"}
-          backgroundColor={Colors.TRANSPARENT}
-          textColors={Colors.LIGHT_GRAY}
-          icon={undefined}
-          onPress={() => {
-            setFeedbackMsg("");
-            navigation.goBack();
-          }}
-          textStyle={FontSize.REGULAR}
-        />
+        <View style={{gap:10, paddingVertical: 10}}>
+          <BigButton
+            text={"Send"}
+            backgroundColor={Colors.PRIMARY}
+            textColors={Colors.WHITE}
+            icon={undefined}
+            onPress={() => sendFeedback()}
+            textStyle={FontSize.REGULAR}
+          />
+          <BigButton
+            text={"Cancle"}
+            backgroundColor={Colors.STROKE}
+            textColors={Colors.LIGHT_GRAY}
+            icon={undefined}
+            onPress={() => {
+              setFeedbackMsg("");
+              navigation.goBack();
+            }}
+            textStyle={FontSize.REGULAR}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );

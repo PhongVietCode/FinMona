@@ -56,18 +56,30 @@ const LoginContainer = () => {
           }}
         >
           <View style={{ flexGrow: 1 }}>
-            <LottieView
-              autoPlay
-              style={{
-                height: 400,
-                backgroundColor: Colors.TRANSPARENT,
-              }}
-              // Find more Lottie files at https://lottiefiles.com/featured
-              source={require("../../../assets/anim/loading_anim.json")}
-            />
+            {show ? (
+              <LottieView
+                autoPlay
+                style={{
+                  height: 400,
+                  backgroundColor: Colors.TRANSPARENT,
+                }}
+                // Find more Lottie files at https://lottiefiles.com/featured
+                source={require("../../../assets/anim/done_anim.json")}
+              />
+            ) : (
+              <LottieView
+                autoPlay
+                style={{
+                  height: 400,
+                  backgroundColor: Colors.TRANSPARENT,
+                }}
+                // Find more Lottie files at https://lottiefiles.com/featured
+                source={require("../../../assets/anim/loading_anim.json")}
+              />
+            )}
           </View>
           {show ? (
-            <View style={{width: '100%', paddingHorizontal: 16}}>
+            <View style={{ width: "100%", paddingHorizontal: 16 }}>
               <BigButton
                 text={"Get Start !"}
                 backgroundColor={Colors.PRIMARY}
@@ -89,6 +101,7 @@ const LoginContainer = () => {
               Creating your account...
             </Text>
           )}
+          <View style={{ height: 30 }}></View>
         </SafeAreaView>
       ) : (
         <Login />

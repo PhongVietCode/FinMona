@@ -123,26 +123,28 @@ export const UpdateUser = () => {
             />
           </View>
         </ScrollView>
-        <BigButton
-          text={"Save"}
-          backgroundColor={Colors.PRIMARY}
-          textColors={Colors.WHITE}
-          icon={undefined}
-          onPress={() => {
-            handleUpdate();
-          }}
-          textStyle={FontSize.REGULAR}
-        />
-        <BigButton
-          text={"Cancle"}
-          backgroundColor={Colors.TRANSPARENT}
-          textColors={Colors.LIGHT_GRAY}
-          icon={undefined}
-          onPress={() => {
-            navigation.goBack();
-          }}
-          textStyle={FontSize.REGULAR}
-        />
+        <View style={{gap: 10, paddingVertical: 10}}>
+          <BigButton
+            text={"Save"}
+            backgroundColor={Colors.PRIMARY}
+            textColors={Colors.WHITE}
+            icon={undefined}
+            onPress={() => {
+              handleUpdate();
+            }}
+            textStyle={FontSize.REGULAR}
+          />
+          <BigButton
+            text={"Cancle"}
+            backgroundColor={Colors.STROKE}
+            textColors={Colors.LIGHT_GRAY}
+            icon={undefined}
+            onPress={() => {
+              navigation.goBack();
+            }}
+            textStyle={FontSize.REGULAR}
+          />
+        </View>
       </View>
     </SafeAreaView>
   );

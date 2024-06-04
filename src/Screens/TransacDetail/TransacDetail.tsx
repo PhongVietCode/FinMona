@@ -187,7 +187,7 @@ export const TransacDetail = () => {
                 ></BigButton>
                 <BigButton
                   text={"Cancle"}
-                  backgroundColor={Colors.TRANSPARENT}
+                  backgroundColor={Colors.STROKE}
                   textColors={Colors.LIGHT_GRAY}
                   icon={undefined}
                   onPress={() => {

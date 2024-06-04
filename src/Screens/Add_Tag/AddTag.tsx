@@ -6,6 +6,7 @@ import { FlatList } from "native-base";
 import AddIcon from "../../../assets/icons/circle-plus.svg";
 
 import {
+  Animated,
   Image,
   ImageBackground,
   Pressable,
@@ -32,7 +33,8 @@ import { gStyles } from "@/Theme";
 import { transactionStyle } from "@/Components/TransactionItem/TransactionItem";
 import { useSelector } from "react-redux";
 import { RootState } from "@/Store";
-
+import Swipeable from "react-native-gesture-handler/Swipeable";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
 export const AddTag = () => {
   const initialForm: Omit<Tag, "id"> = {
     icon: "undefined",
@@ -48,7 +50,7 @@ export const AddTag = () => {
   const [activeItem, setActiveItem] = useState(list[0]);
 
   const [addTag, addTagResult] = useAddTagMutation();
-  const user = useSelector((state: RootState) => state.user)
+  const user = useSelector((state: RootState) => state.user);
 
   const handleSaveTag = async (event: any) => {
     setShowAddModal(false);
@@ -69,10 +71,38 @@ export const AddTag = () => {
   const [fetchTag, { data, isLoading, isFetching }] = useLazyGetAllTagsQuery();
 
   useEffect(() => {
-    fetchTag({ id: user.id});
+    fetchTag({ id: user.id });
   }, [data]);
   const navigation =
     useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const swipeRight = (progress: any, dragX: any) => {
+    const scale = dragX.interpolate({
+      inputRange: [-200, 0],
+      outputRange: [1, 0.5],
+      extrapolate: "clamp",
+    });
+    return (
+      <Animated.View
+        style={{
+          backgroundColor: "red",
+          width: "100%",
+          justifyContent: "center",
+        }}
+      >
+        <Animated.Text
+          style={{
+            marginLeft: "auto",
+            marginRight: 50,
+            fontSize: 15,
+            fontWeight: "bold",
+            transform: [{ scale }],
+          }}
+        >
+          Delete Item
+        </Animated.Text>
+      </Animated.View>
+    );
+  };
   return (
     <SafeAreaView style={{ backgroundColor: Colors.BACKGROUND, flex: 1 }}>
       <Header
@@ -94,7 +124,7 @@ export const AddTag = () => {
           </View>
         }
       ></Header>
-      <ScrollView style={{ paddingHorizontal: 16 }}>
+      <View style={{ paddingHorizontal: 16 }}>
         <Text style={[gStyles.title2]}>Category: </Text>
         {isLoading ? (
           <Text>Loading Tags...</Text>
@@ -102,15 +132,76 @@ export const AddTag = () => {
           <View>
             {data
               ?.filter((item) => item.type === "Category")
-              .map((item, idex) => {
+              .map((item, index) => {
                 const style = transactionStyle(item.title.split("_")[1]);
                 return (
-                  <View style={{flexDirection:'row', width: '100%', padding: 10, alignItems:'center', gap:10, backgroundColor:Colors.STROKE, marginVertical: 2}}>
-                    <View style={{backgroundColor: style?.backgroundIconColor, padding: 5, borderRadius: 5}}>{style?.icon}</View>
-                    <Text style={{fontSize: 16, fontWeight:'600'}}>{item.title.split("_")[0]}</Text>
+                  <View
+                    style={{
+                      flexDirection: "row",
+                      width: "100%",
+                      padding: 10,
+                      alignItems: "center",
+                      gap: 10,
+                      backgroundColor: Colors.STROKE,
+                      marginVertical: 2,
+                    }}
+                    key={index}
+                  >
+                    <View
+                      style={{
+                        backgroundColor: style?.backgroundIconColor,
+                        padding: 5,
+                        borderRadius: 5,
+                      }}
+                    >
+                      {style?.icon}
+                    </View>
+                    <Text style={{ fontSize: 16, fontWeight: "600" }}>
+                      {item.title.split("_")[0]}
+                    </Text>
                   </View>
                 );
               })}
+            {/* <FlatList
+              data={data?.filter((item) => item.type === "Category")}
+              renderItem={({ item, index }) => {
+                const style = transactionStyle(item.title.split("_")[1]);
+                return (
+                  <GestureHandlerRootView>
+                    <Swipeable
+                      renderRightActions={swipeRight}
+                      rightThreshold={-20}
+                    >
+                      <Animated.View
+                        style={{
+                          flexDirection: "row",
+                          width: "100%",
+                          padding: 10,
+                          alignItems: "center",
+                          gap: 10,
+                          backgroundColor: Colors.STROKE,
+                          marginVertical: 2,
+                        }}
+                        key={index}
+                      >
+                        <View
+                          style={{
+                            backgroundColor: style?.backgroundIconColor,
+                            padding: 5,
+                            borderRadius: 5,
+                          }}
+                        >
+                          {style?.icon}
+                        </View>
+                        <Text style={{ fontSize: 16, fontWeight: "600" }}>
+                          {item.title.split("_")[0]}
+                        </Text>
+                      </Animated.View>
+                    </Swipeable>
+                  </GestureHandlerRootView>
+                );
+              }}
+            /> */}
           </View>
         )}
         <Text style={[gStyles.title2]}>Money Source: </Text>
@@ -120,14 +211,52 @@ export const AddTag = () => {
           <View>
             {data
               ?.filter((item) => item.type === "Money Source")
-              .map((item, idex) => (
-                <View style={{flexDirection:'row', width: '100%', padding: 14, alignItems:'center', gap:10, backgroundColor:Colors.STROKE, marginVertical: 2}}>
-                    <Text style={{fontSize: 16, fontWeight:'600'}}>{item.title.split("_")[0]}</Text>
-                  </View>
+              .map((item, index) => (
+                <View
+                  style={{
+                    flexDirection: "row",
+                    width: "100%",
+                    padding: 14,
+                    alignItems: "center",
+                    gap: 10,
+                    backgroundColor: Colors.STROKE,
+                    marginVertical: 2,
+                  }}
+                  key={index}
+                >
+                  <Text style={{ fontSize: 16, fontWeight: "600" }}>
+                    {item.title.split("_")[0]}
+                  </Text>
+                </View>
               ))}
           </View>
+          // <FlatList
+          //   data={data?.filter((item) => item.type === "Money Source")}
+          //   renderItem={({ item, index }) => (
+          //     <GestureHandlerRootView>
+          //       <Swipeable renderRightActions={swipeRight} rightThreshold={-20}>
+          //         <Animated.View
+          //           style={{
+          //             flex: 1,
+          //             flexDirection: "row",
+          //             // height: 70,
+          //             paddingVertical: 10,
+          //             alignItems: "center",
+          //             borderBottomWidth: 1,
+          //             backgroundColor: Colors.STROKE,
+          //             gap: 10,
+          //           }}
+          //         >
+          //           <Text style={{ fontSize: 16, fontWeight: "600" }}>
+          //             {item.title.split("_")[0]}
+          //           </Text>
+          //         </Animated.View>
+          //       </Swipeable>
+          //     </GestureHandlerRootView>
+          //   )}
+          // />
         )}
-      </ScrollView>
+      </View>
       <BottomSheet
         visible={showAddModal}
         onBackdropPress={() => {
@@ -207,7 +336,11 @@ export const AddTag = () => {
                     setChoosenType(0);
                     setList(["Shopping", "Food", "Transport", "Party"]);
                     setActiveItem("Shopping");
-                    setFormAddTag({ ...formAddTag, type: "Category" });
+                    setFormAddTag({
+                      ...formAddTag,
+                      icon: activeItem,
+                      type: "Category",
+                    });
                   }}
                   style={{
                     backgroundColor:
@@ -267,18 +400,28 @@ export const AddTag = () => {
                 </View>
               ))}
             </View>
-            <View style={{ marginBottom: 5 }}></View>
-            <BigButton
-              text={"Add to my account"}
-              backgroundColor={Colors.PRIMARY}
-              textColors={Colors.WHITE}
-              icon={undefined}
-              onPress={(e: any) => {
-                handleSaveTag(e);
-              }}
-              textStyle={FontSize.REGULAR}
-            ></BigButton>
-            <View style={{ marginBottom: 5 }}></View>
+            <View style={{ paddingVertical: 10, gap: 10 }}>
+              <BigButton
+                text={"Add to my account"}
+                backgroundColor={Colors.PRIMARY}
+                textColors={Colors.WHITE}
+                icon={undefined}
+                onPress={(e: any) => {
+                  handleSaveTag(e);
+                }}
+                textStyle={FontSize.REGULAR}
+              ></BigButton>
+              <BigButton
+                text={"Cancle"}
+                backgroundColor={Colors.STROKE}
+                textColors={Colors.LIGHT_GRAY}
+                icon={undefined}
+                onPress={(e: any) => {
+                  handleSaveTag(e);
+                }}
+                textStyle={FontSize.REGULAR}
+              ></BigButton>
+            </View>
           </ScrollView>
         </View>
       </BottomSheet>

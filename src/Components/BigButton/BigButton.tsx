@@ -13,7 +13,7 @@ export interface BigButtonProps{
 }
 export const BigButton = (props: BigButtonProps) =>{
     return (
-        <Pressable style={[styles.button, {backgroundColor: props.backgroundColor}]} onPress={props.onPress}>
+        <Pressable style={[styles.button, {backgroundColor: props.backgroundColor, elevation: 3}]} onPress={props.onPress}>
             <Text style={[styles.text, gStyles.title1, {color: props.textColors, fontSize: props.textStyle}]}>{props.text}</Text>
         </Pressable>
     )

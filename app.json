@@ -2,20 +2,22 @@
   "expo": {
     "name": "FinMona",
     "slug": "expo-redux-template",
-    "version": "2.0",
+    "version": "1.1.0",
     "orientation": "portrait",
     "icon": "./assets/logo.png",
     "userInterfaceStyle": "light",
     "splash": {
       "image": "./assets/logo.png",
-      "resizeMode": "cover",
+      "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
     "updates": {
       "fallbackToCacheTimeout": 0,
       "url": "https://u.expo.dev/87976efc-a8d9-410c-b37b-954f050af63a"
     },
-    "assetBundlePatterns": ["**/*"],
+    "assetBundlePatterns": [
+      "**/*"
+    ],
     "ios": {
       "supportsTablet": true,
       "bundleIdentifier": "com.hpcc.expo-redux-template"
@@ -28,17 +30,9 @@
       "package": "com.hpcc.expo_redux_template"
     },
     "web": {
-      "favicon": "./assets/logo.png"
+      "favicon": "./assets/favicon.png"
     },
-    "plugins": [
-      [
-        "@sentry/react-native/expo",
-        {
-          "organization": "phong-company",
-          "project": "finmona"
-        }
-      ]
-    ],
+    "plugins": [],
     "runtimeVersion": {
       "policy": "sdkVersion"
     },

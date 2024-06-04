@@ -104,7 +104,7 @@ export const TransactionItem = (props: Transaction) => {
             ellipsizeMode="tail"
             numberOfLines={1}
           >
-            {props.description}
+            {props.description.length == 0 ? "No description" : props.description} 
           </Text>
           <Text
             style={{ fontSize: FontSize.SMALL - 1, color: Colors.LIGHT_GRAY }}

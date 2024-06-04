@@ -77,6 +77,7 @@ export const BudgetScreen = () => {
           icon={undefined}
           textStyle={FontSize.REGULAR}
         />
+        <View style={{height: 10}}></View>
       </View>
     </SafeAreaView>
   );

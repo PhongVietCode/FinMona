@@ -136,7 +136,7 @@ export const EditTransaction = () => {
           <View style={{ margin: 8 }}></View>
           <BigButton
             text={"Cancle"}
-            backgroundColor={Colors.TRANSPARENT}
+            backgroundColor={Colors.STROKE}
             textColors={Colors.LIGHT_GRAY}
             icon={undefined}
             onPress={() => navigation.goBack()} // can use on go back
