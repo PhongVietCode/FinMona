@@ -338,7 +338,7 @@ export const AddTag = () => {
                     setActiveItem("Shopping");
                     setFormAddTag({
                       ...formAddTag,
-                      icon: activeItem,
+                      icon: "Shopping",
                       type: "Category",
                     });
                   }}
