@@ -39,7 +39,6 @@ export const UpdateUser = () => {
   const [form, setForm] = useState<UserUpdateInfo>({
     name: user.name,
     email: user.email,
-    password: user.password,
     avatar: user.avatar,
   });
   const handleUpdate = () => {
