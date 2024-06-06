@@ -19,7 +19,6 @@ export interface UserLoginInfo {
 export interface UserUpdateInfo {
   name: string,
   email: string,
-  password: string,
   avatar: string
 }
 const userApi = API.injectEndpoints({
