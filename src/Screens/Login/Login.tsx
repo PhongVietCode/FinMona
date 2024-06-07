@@ -112,7 +112,7 @@ const Login = () => {
         />
         <BigButton
           text={"Forgot password ?"}
-          backgroundColor={Colors.TRANSPARENT}
+          backgroundColor={Colors.STROKE}
           textColors={Colors.LIGHT_GRAY}
           icon={undefined}
           textStyle={FontSize.REGULAR}
